@@ -1,0 +1,38 @@
+.progress-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+.progress-label  { font-size: 13px; font-weight: 700; font-family: var(--fm); }
+.progress-wrap   { background: var(--bg2); border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 1rem; }
+.progress-fill   { height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--green-d), var(--green-l)); transition: width .5s ease; }
+
+.hab-section  { margin-bottom: .5rem; border-radius: var(--radius); overflow: hidden; border: 0.5px solid var(--border); }
+.hab-header   { display: flex; align-items: center; gap: 10px; padding: .875rem 1rem; background: var(--bg); cursor: pointer; user-select: none; transition: background .15s; }
+.hab-header:hover { background: var(--bg2); }
+.hab-icon  { font-size: 18px; flex-shrink: 0; }
+.hab-title { font-size: 13px; font-weight: 700; flex: 1; }
+.hab-meta  { font-size: 11px; font-family: var(--fm); color: var(--hint); }
+.hab-chev  { font-size: 11px; color: var(--hint); transition: transform .2s; flex-shrink: 0; }
+.hab-chev.open { transform: rotate(180deg); }
+
+.hab-body         { display: none; border-top: 0.5px solid var(--border); }
+.hab-body.open    { display: block; }
+
+.hc { display: flex; align-items: center; gap: 12px; padding: 10px 1rem; border-bottom: 0.5px solid var(--border); }
+.hc:last-child { border-bottom: none; }
+.hck {
+  width: 22px; height: 22px; border-radius: 6px;
+  border: 1.5px solid var(--border);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; transition: all .15s;
+  background: transparent; flex-shrink: 0; color: #fff;
+}
+.hck.done { background: var(--green-d); border-color: var(--green-d); }
+.hcl { font-size: 13px; flex: 1; line-height: 1.4; }
+.hcl.done { text-decoration: line-through; color: var(--hint); }
+.hcs { font-size: 11px; font-family: var(--fm); color: var(--gold); white-space: nowrap; }
+
+.add-row { display: flex; align-items: center; gap: 8px; padding: 8px 1rem; background: var(--bg2); }
+.add-row input { flex: 1; background: var(--bg); }
+
+.streak-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.streak-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px; text-align: center; }
+.streak-val  { font-size: 24px; font-weight: 700; font-family: var(--fm); color: var(--gold); }
+.streak-lbl  { font-size: 10px; color: var(--hint); margin-top: 2px; text-transform: uppercase; letter-spacing: .5px; }

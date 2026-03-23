@@ -1,0 +1,101 @@
+.cat-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: .75rem; }
+.cat-pill {
+  padding: 5px 12px; border-radius: 20px;
+  border: 0.5px solid var(--border);
+  background: var(--bg); color: var(--muted);
+  cursor: pointer; font-size: 11px; font-family: var(--ff); font-weight: 500;
+  transition: all .15s;
+}
+.cat-pill:hover  { border-color: var(--green-d); }
+.cat-pill.active { border-color: var(--green-d); background: rgba(15,77,46,.08); color: var(--green-d); }
+
+.sec-div {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .5rem 0; border-bottom: 0.5px solid var(--border); margin-bottom: .5rem;
+  font-size: 12px; font-weight: 700; color: var(--muted);
+}
+.sec-count { font-size: 11px; font-family: var(--fm); color: var(--hint); font-weight: 400; }
+
+.lesson-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 0; border-bottom: 0.5px solid var(--border); }
+.lesson-item:last-child { border-bottom: none; }
+
+.l-check {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; transition: all .15s;
+  background: transparent; flex-shrink: 0; margin-top: 1px; color: #fff;
+}
+.l-check.done { background: var(--green-d); border-color: var(--green-d); }
+
+.l-info  { flex: 1; min-width: 0; }
+.l-title { font-size: 13px; font-weight: 500; line-height: 1.4; }
+.l-title.done { text-decoration: line-through; color: var(--hint); }
+
+.l-sub { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 5px; }
+.l-cat    { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--bg2); color: var(--muted); font-weight: 500; }
+.l-source { font-size: 11px; color: var(--hint); }
+.l-link   { font-size: 11px; color: var(--blue); text-decoration: none; display: inline-flex; align-items: center; gap: 2px; }
+.l-link:hover { text-decoration: underline; }
+.l-day { font-size: 10px; font-family: var(--fm); color: var(--gold); padding: 2px 7px; background: rgba(201,162,39,.1); border-radius: 6px; white-space: nowrap; }
+
+/* ---- View switcher ---- */
+.view-switcher { display: flex; gap: 4px; margin-bottom: .75rem; }
+.view-pill {
+  padding: 5px 14px; border-radius: 20px;
+  border: 0.5px solid var(--border); background: var(--bg); color: var(--muted);
+  cursor: pointer; font-size: 11px; font-family: var(--ff); font-weight: 500;
+  transition: all .15s;
+}
+.view-pill.active { border-color: var(--green-d); background: rgba(15,77,46,.08); color: var(--green-d); }
+
+/* ---- Week group label ---- */
+.week-group-label {
+  font-size: 10px; font-weight: 700; color: var(--hint);
+  text-transform: uppercase; letter-spacing: .8px;
+  padding: .6rem 0 .3rem;
+  border-bottom: 0.5px solid var(--border);
+  margin-bottom: .25rem;
+}
+.week-group-label.current { color: var(--green-d); }
+
+.btn-link {
+  background: none; border: none; cursor: pointer;
+  color: var(--green-d); font-size: 13px; font-family: var(--ff);
+  padding: 0; text-decoration: underline;
+}
+
+/* ---- Week navigator bar ---- */
+.week-nav-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; margin-bottom: .6rem; flex-wrap: wrap;
+}
+.week-nav-left { display: flex; align-items: center; gap: 4px; }
+.wnav-btn {
+  background: var(--bg); border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 5px 11px;
+  cursor: pointer; font-size: 13px; color: var(--text);
+  font-family: var(--ff); transition: all .15s; line-height: 1;
+}
+.wnav-btn:hover { background: var(--bg2); }
+.wnav-label {
+  font-size: 12px; font-weight: 700; font-family: var(--fm);
+  color: var(--text); min-width: 110px; text-align: center;
+  padding: 0 2px;
+}
+.wnav-today {
+  font-size: 11px; padding: 5px 10px;
+  background: rgba(15,77,46,.07);
+  border-color: var(--green-d); color: var(--green-d); font-weight: 700;
+}
+.wnav-today:hover { background: rgba(15,77,46,.15); }
+.wnav-today.hidden { display: none; }
+
+.view-pill-wrap { display: flex; gap: 3px; }
+
+.week-group-label.viewed { color: #3B8BD4; }
+.week-empty {
+  padding: .875rem 0; text-align: center;
+  font-size: 13px; color: var(--hint);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}

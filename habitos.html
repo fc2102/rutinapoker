@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hábitos · Poker Tracker</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="habitos.css">
+</head>
+<body>
+<div class="page-header">
+  <a class="back-btn" href="index.html">← Inicio</a>
+  <div>
+    <h1>Hábitos</h1>
+    <span class="sub" id="today-label"></span>
+  </div>
+</div>
+
+<main>
+  <div class="progress-header">
+    <span class="sec" style="margin:0">Progreso de hoy</span>
+    <span class="progress-label" id="progress-label">0 / 0</span>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+  <div class="hab-section" id="sec-warmup">
+    <div class="hab-header" onclick="toggleSec('warmup')">
+      <span class="hab-icon">☀️</span>
+      <span class="hab-title">Warm Up</span>
+      <span class="hab-meta" id="meta-warmup">0/0</span>
+      <span class="hab-chev open" id="chev-warmup">▾</span>
+    </div>
+    <div class="hab-body open" id="body-warmup">
+      <div id="list-warmup"></div>
+      <div class="add-row">
+        <input type="text" id="new-warmup" placeholder="Nuevo hábito de warm up..." onkeydown="if(event.key==='Enter')addHabit('warmup')">
+        <button class="btn btn-p btn-sm" onclick="addHabit('warmup')">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hab-section" id="sec-session">
+    <div class="hab-header" onclick="toggleSec('session')">
+      <span class="hab-icon">♠️</span>
+      <span class="hab-title">Durante la sesión</span>
+      <span class="hab-meta" id="meta-session">0/0</span>
+      <span class="hab-chev open" id="chev-session">▾</span>
+    </div>
+    <div class="hab-body open" id="body-session">
+      <div id="list-session"></div>
+      <div class="add-row">
+        <input type="text" id="new-session" placeholder="Nuevo hábito de sesión..." onkeydown="if(event.key==='Enter')addHabit('session')">
+        <button class="btn btn-p btn-sm" onclick="addHabit('session')">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hab-section" id="sec-colddown">
+    <div class="hab-header" onclick="toggleSec('colddown')">
+      <span class="hab-icon">🌙</span>
+      <span class="hab-title">Cold Down</span>
+      <span class="hab-meta" id="meta-colddown">0/0</span>
+      <span class="hab-chev open" id="chev-colddown">▾</span>
+    </div>
+    <div class="hab-body open" id="body-colddown">
+      <div id="list-colddown"></div>
+      <div class="add-row">
+        <input type="text" id="new-colddown" placeholder="Nuevo hábito de cold down..." onkeydown="if(event.key==='Enter')addHabit('colddown')">
+        <button class="btn btn-p btn-sm" onclick="addHabit('colddown')">+</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec" style="margin-top:1.5rem">Rachas</p>
+  <div class="streak-grid" id="streak-grid"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="shared.js"></script>
+<script src="habitos.js"></script>
+</body>
+</html>

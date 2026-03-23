@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clases · Poker Tracker</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="clases.css">
+</head>
+<body>
+<div class="page-header">
+  <a class="back-btn" href="index.html">← Inicio</a>
+  <h1>Clases</h1>
+</div>
+
+<main>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+    <p class="sec" style="margin:0">Lista de clases</p>
+    <button class="btn btn-ghost btn-sm" onclick="toggleForm()">+ Añadir</button>
+  </div>
+
+  <div class="card" id="add-form-card" style="display:none">
+    <div class="form-col">
+      <div class="fg"><label>Título de la clase</label><input type="text" id="les-title" placeholder="ej. GTO vs Exploitative Play"></div>
+      <div class="frow">
+        <div class="fg">
+          <label>Categoría</label>
+          <select id="les-cat">
+            <option value="preflop">Preflop</option>
+            <option value="postflop">Postflop</option>
+            <option value="mental">Mental game</option>
+            <option value="teoria">Teoría</option>
+            <option value="solver">Solver / Software</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="fg"><label>Día a ver</label><input type="date" id="les-day"></div>
+      </div>
+      <div class="fg"><label>Fuente / Coach</label><input type="text" id="les-source" placeholder="ej. Upswing Poker, nombre del coach..."></div>
+      <div class="fg"><label>Link de la clase</label><input type="url" id="les-link" placeholder="https://..."></div>
+      <button class="btn btn-p btn-block" onclick="addLesson()">Guardar clase</button>
+    </div>
+  </div>
+
+  <!-- Week navigator + view toggle -->
+  <div class="week-nav-bar">
+    <div class="week-nav-left">
+      <button class="wnav-btn" onclick="shiftWeek(-1)">&#8592;</button>
+      <span class="wnav-label" id="wnav-label"></span>
+      <button class="wnav-btn" onclick="shiftWeek(1)">&#8594;</button>
+      <button class="wnav-btn wnav-today" id="wnav-today" onclick="goThisWeek()">Esta sem.</button>
+    </div>
+    <div class="view-pill-wrap">
+      <div class="view-pill active" data-view="week" onclick="setView('week')">Semana</div>
+      <div class="view-pill"       data-view="all"  onclick="setView('all')">Todas</div>
+    </div>
+  </div>
+
+  <!-- Category filter -->
+  <div class="cat-filter">
+    <div class="cat-pill active" data-cat="all"      onclick="filterCat(this)">Todas</div>
+    <div class="cat-pill" data-cat="preflop"  onclick="filterCat(this)">Preflop</div>
+    <div class="cat-pill" data-cat="postflop" onclick="filterCat(this)">Postflop</div>
+    <div class="cat-pill" data-cat="mental"   onclick="filterCat(this)">Mental</div>
+    <div class="cat-pill" data-cat="teoria"   onclick="filterCat(this)">Teoría</div>
+    <div class="cat-pill" data-cat="solver"   onclick="filterCat(this)">Solver</div>
+    <div class="cat-pill" data-cat="otro"     onclick="filterCat(this)">Otro</div>
+  </div>
+
+  <div class="sec-div"><span>Pendientes</span><span class="sec-count" id="pending-count"></span></div>
+  <div class="card" style="padding:.5rem 1rem" id="lessons-pending"></div>
+
+  <div id="done-section" style="display:none">
+    <div class="sec-div" style="margin-top:.75rem"><span>Completadas</span><span class="sec-count" id="done-count"></span></div>
+    <div class="card" style="padding:.5rem 1rem" id="lessons-done"></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="shared.js"></script>
+<script src="clases.js"></script>
+</body>
+</html>

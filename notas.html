@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notas · Poker Tracker</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="notas.css">
+</head>
+<body>
+<div class="page-header">
+  <a class="back-btn" href="index.html">← Inicio</a>
+  <h1>Notas</h1>
+</div>
+
+<main>
+  <div class="card form-col">
+    <div class="fg">
+      <label>Nueva nota</label>
+      <textarea id="note-input" style="min-height:100px" placeholder="Reflexiones, conceptos, reads sobre villanos, leaks detectados, manos interesantes..."></textarea>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label>Categoría</label>
+        <select id="note-cat">
+          <option>Aprendizaje</option>
+          <option>Mano interesante</option>
+          <option>Mental game</option>
+          <option>Leak detectado</option>
+          <option>Concepto GTO</option>
+          <option>Villano / Read</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="fg"><label>Fecha</label><input type="date" id="note-date"></div>
+    </div>
+    <button class="btn btn-p btn-block" onclick="saveNote()">Guardar nota</button>
+  </div>
+
+  <div class="notes-toolbar">
+    <p class="sec" style="margin:0">Notas <span id="notes-count" style="color:var(--hint);font-weight:400"></span></p>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Buscar..." oninput="renderNotes()">
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <div class="filter-pill active" data-cat="all"                onclick="filterCat(this)">Todas</div>
+    <div class="filter-pill" data-cat="Aprendizaje"              onclick="filterCat(this)">Aprendizaje</div>
+    <div class="filter-pill" data-cat="Mano interesante"         onclick="filterCat(this)">Manos</div>
+    <div class="filter-pill" data-cat="Mental game"              onclick="filterCat(this)">Mental</div>
+    <div class="filter-pill" data-cat="Leak detectado"           onclick="filterCat(this)">Leaks</div>
+    <div class="filter-pill" data-cat="Concepto GTO"             onclick="filterCat(this)">GTO</div>
+    <div class="filter-pill" data-cat="Villano / Read"           onclick="filterCat(this)">Villanos</div>
+  </div>
+
+  <div id="notes-list"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="shared.js"></script>
+<script src="notas.js"></script>
+</body>
+</html>

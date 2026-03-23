@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horario · Poker Tracker</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="calendario.css">
+</head>
+<body>
+
+<div class="page-header">
+  <a class="back-btn" href="index.html">← Inicio</a>
+  <div style="flex:1; min-width:0">
+    <h1>Horario semanal</h1>
+    <span class="sub" id="week-label"></span>
+  </div>
+  <div class="week-nav">
+    <button class="week-btn" onclick="prevWeek()">&#8592;</button>
+    <button class="week-btn today-btn" onclick="goToday()">Hoy</button>
+    <button class="week-btn" onclick="nextWeek()">&#8594;</button>
+  </div>
+</div>
+
+<div class="day-tabs" id="day-tabs"></div>
+
+<div class="schedule-outer">
+  <div class="schedule-wrap">
+    <div class="time-col" id="time-col"></div>
+    <div class="days-grid" id="days-grid"></div>
+  </div>
+</div>
+
+<!-- Add event bottom panel -->
+<div class="add-panel" id="add-panel" style="display:none">
+  <div class="add-panel-inner">
+    <div class="add-panel-hd">
+      <div>
+        <div class="add-panel-title">Nueva actividad</div>
+        <div class="add-panel-date" id="add-panel-date"></div>
+      </div>
+      <button class="close-btn" onclick="closePanel()">&#215;</button>
+    </div>
+    <div class="type-pills" id="type-pills">
+      <div class="type-pill active" data-type="estudio"  onclick="selectType(this)">📚 Estudio</div>
+      <div class="type-pill"        data-type="coaching" onclick="selectType(this)">🎓 Coaching</div>
+      <div class="type-pill"        data-type="juego"    onclick="selectType(this)">♠ Juego</div>
+      <div class="type-pill"        data-type="revision" onclick="selectType(this)">🔍 Revisión</div>
+      <div class="type-pill"        data-type="gym"      onclick="selectType(this)">💪 Gym</div>
+      <div class="type-pill"        data-type="libre"    onclick="selectType(this)">😴 Libre</div>
+      <div class="type-pill"        data-type="otros"    onclick="selectType(this)">📌 Otros</div>
+    </div>
+    <div class="frow" style="margin-top:10px">
+      <div class="fg"><label>Hora inicio</label><input type="time" id="ev-time" value="10:00"></div>
+      <div class="fg"><label>Hora fin</label><input type="time" id="ev-end" value="12:00"></div>
+    </div>
+    <div class="fg" style="margin-top:10px">
+      <label>Descripción</label>
+      <input type="text" id="ev-desc" placeholder="ej. GTO solver, sesión live...">
+    </div>
+    <button class="btn btn-p btn-block" style="margin-top:12px" onclick="addEvent()">Añadir al horario</button>
+  </div>
+</div>
+<div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+
+<!-- Copy day modal -->
+<div class="copy-modal-overlay" id="copy-modal-overlay" onclick="closeCopyModal()"></div>
+<div class="copy-modal" id="copy-modal" style="display:none">
+  <div class="copy-modal-hd">
+    <div>
+      <div class="copy-modal-title">Copiar día</div>
+      <div class="copy-modal-src" id="copy-modal-src"></div>
+    </div>
+    <button class="close-btn" onclick="closeCopyModal()">&#215;</button>
+  </div>
+  <div class="copy-modal-body">
+    <div class="copy-preview" id="copy-preview"></div>
+    <div class="fg" style="margin-top:12px">
+      <label>Copiar al día</label>
+      <input type="date" id="copy-target-date">
+    </div>
+    <div class="copy-options">
+      <label class="copy-opt">
+        <input type="checkbox" id="copy-overwrite"> Reemplazar actividades existentes en el destino
+      </label>
+    </div>
+    <button class="btn btn-p btn-block" style="margin-top:12px" onclick="confirmCopy()">Copiar actividades</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="shared.js"></script>
+<script src="calendario.js"></script>
+</body>
+</html>

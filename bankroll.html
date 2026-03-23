@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bankroll · Poker Tracker</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="bankroll.css">
+</head>
+<body>
+<div class="page-header">
+  <a class="back-btn" href="index.html">← Inicio</a>
+  <h1>Bankroll</h1>
+</div>
+
+<main>
+  <div class="card">
+    <div class="br-hero">
+      <div class="br-total" id="br-total">€0</div>
+      <div class="br-sub"   id="br-sub">Bankroll actual</div>
+    </div>
+    <div class="br-grid">
+      <div class="brc"><div class="brc-v pos" id="br-won">+€0</div><div class="brc-l">Ganado mes</div></div>
+      <div class="brc"><div class="brc-v neg" id="br-lost">-€0</div><div class="brc-l">Perdido mes</div></div>
+      <div class="brc"><div class="brc-v"     id="br-weeks">0</div><div class="brc-l">Semanas</div></div>
+      <div class="brc"><div class="brc-v"     id="br-roi">0%</div><div class="brc-l">ROI total</div></div>
+    </div>
+  </div>
+
+  <div class="card" id="chart-card" style="display:none">
+    <p class="sec" style="margin:0 0 .5rem">Evolución</p>
+    <div class="chart-wrap" id="br-chart"></div>
+  </div>
+
+  <p class="sec">Actualización semanal</p>
+  <div class="card form-col">
+    <div class="fg">
+      <label>Bankroll inicial (establece una sola vez)</label>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="initial-input" placeholder="ej. 500">
+        <button class="btn btn-ghost btn-sm" onclick="setInitial()" style="white-space:nowrap">Guardar</button>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Semana (fecha inicio)</label><input type="date" id="week-date"></div>
+      <div class="fg"><label>Resultado (€)</label><input type="number" id="week-result" placeholder="+50 o -30" step="0.5"></div>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label>Formato</label>
+        <select id="week-format">
+          <option>Cash</option><option>MTT</option><option>SNG</option><option>Spin&amp;Go</option><option>Mixto</option>
+        </select>
+      </div>
+      <div class="fg"><label>Stakes</label><input type="text" id="week-stakes" placeholder="ej. NL25, €11 MTT"></div>
+    </div>
+    <div class="fg"><label>Notas (opcional)</label><input type="text" id="week-notes" placeholder="Resumen de la semana..."></div>
+    <button class="btn btn-g btn-block" onclick="saveWeek()">Guardar semana</button>
+  </div>
+
+  <p class="sec">Histórico semanal</p>
+  <div class="card" style="padding:.5rem 1rem" id="br-history">
+    <p style="color:var(--hint);font-size:13px;text-align:center;padding:.75rem 0">Sin semanas registradas</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="shared.js"></script>
+<script src="bankroll.js"></script>
+</body>
+</html>
