@@ -120,6 +120,32 @@ function loadState() {
 //     // assign to your local state variable and render
 //   });
 
+// Returns a "weight" score for a state object — more data = higher score.
+// Used to avoid overwriting richer data with emptier data.
+function stateWeight(p) {
+  if (!p) return 0;
+  return (
+    (p.sessions   || []).length * 3 +
+    (p.calEvents  || []).length * 3 +
+    (p.lessons    || []).length * 2 +
+    (p.notes      || []).length * 2 +
+    Object.values(p.habits || {}).flat().length +
+    ((p.bankroll && p.bankroll.weeks) ? p.bankroll.weeks.length * 2 : 0)
+  );
+}
+
+// Save a timestamped backup to localStorage (keeps last 3)
+function saveBackup(data, source) {
+  try {
+    const key = LOCAL_KEY + '_backups';
+    let backups = [];
+    try { backups = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+    backups.unshift({ ts: new Date().toISOString(), source, data });
+    backups = backups.slice(0, 3); // keep only last 3
+    localStorage.setItem(key, JSON.stringify(backups));
+  } catch(e) {}
+}
+
 async function initState(callback) {
   // 1. Render immediately from local cache (fast)
   const cached = loadState();
@@ -133,13 +159,30 @@ async function initState(callback) {
     );
 
     if (rows && rows.length && rows[0].data) {
-      // Got fresh data — update cache and re-render
-      const fresh = sanitize(rows[0].data);
-      try { localStorage.setItem(LOCAL_KEY, JSON.stringify(fresh)); } catch(e) {}
-      if (callback) callback(fresh);
+      const remote = sanitize(rows[0].data);
+      const remoteW = stateWeight(remote);
+      const cachedW = stateWeight(cached);
+
+      // Safety check: only use remote if it has more or equal data than local cache.
+      // This prevents an empty remote from wiping out a rich local state.
+      if (remoteW >= cachedW) {
+        saveBackup(remote, 'supabase');
+        try { localStorage.setItem(LOCAL_KEY, JSON.stringify(remote)); } catch(e) {}
+        if (callback) callback(remote);
+      } else {
+        // Local cache is richer — push it to Supabase to fix the remote
+        console.warn(`Local richer (${cachedW}) than remote (${remoteW}) — pushing local to Supabase`);
+        saveBackup(cached, 'local-push');
+        await sbFetch(`/rest/v1/${TABLE}`, {
+          method: 'POST',
+          headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify({ user_id: USER_ID, data: cached, updated_at: new Date().toISOString() }),
+        });
+        if (callback) callback(cached);
+      }
       setSyncDot('ok');
     } else {
-      // No row yet — insert current local state as starting point
+      // No row in Supabase yet — create it
       await sbFetch(`/rest/v1/${TABLE}`, {
         method: 'POST',
         headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
@@ -156,7 +199,17 @@ async function initState(callback) {
 // ---- saveState — sync to localStorage + async push to Supabase ----
 
 function saveState(s) {
-  // Always save locally first (instant, no network needed)
+  // Guard: never save an empty-ish state if current state is richer
+  const current = loadState();
+  if (stateWeight(s) < stateWeight(current) - 5) {
+    console.warn('saveState blocked: new state is significantly emptier than current. Diff:', stateWeight(current) - stateWeight(s));
+    return;
+  }
+
+  // Save backup before overwriting
+  saveBackup(current, 'pre-save');
+
+  // Save to localStorage immediately
   try { localStorage.setItem(LOCAL_KEY, JSON.stringify(s)); } catch(e) {}
 
   // Push to Supabase in background
@@ -226,4 +279,34 @@ function getWeekNumber(dateStr) {
   const startW = new Date(jan4);
   startW.setDate(jan4.getDate() - ((jan4.getDay() + 6) % 7));
   return Math.floor((d - startW) / (7 * 86400000)) + 1;
+}
+
+// ---- Backup recovery (call from browser console if needed) ----
+// Usage: restoreBackup(0)  → restores most recent backup
+//        listBackups()     → shows all saved backups
+
+function listBackups() {
+  try {
+    const backups = JSON.parse(localStorage.getItem(LOCAL_KEY + '_backups') || '[]');
+    backups.forEach((b, i) => {
+      const w = stateWeight(b.data);
+      console.log(`[${i}] ${b.ts} | source: ${b.source} | weight: ${w} | calEvents: ${(b.data.calEvents||[]).length} | sessions: ${(b.data.sessions||[]).length}`);
+    });
+    return backups;
+  } catch(e) { console.error(e); }
+}
+
+async function restoreBackup(index = 0) {
+  try {
+    const backups = JSON.parse(localStorage.getItem(LOCAL_KEY + '_backups') || '[]');
+    if (!backups[index]) { console.error('No backup at index', index); return; }
+    const data = backups[index].data;
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(data));
+    await sbFetch(`/rest/v1/${TABLE}`, {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ user_id: USER_ID, data, updated_at: new Date().toISOString() }),
+    });
+    console.log('Backup restored. Reload the page.');
+  } catch(e) { console.error('Restore failed:', e); }
 }
