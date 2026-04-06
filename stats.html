@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estadísticas · Poker Tracker</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="stats.css">
+</head>
+<body>
+
+<div class="page-header">
+  <a class="back-btn" href="index.html">← Inicio</a>
+  <div style="flex:1;min-width:0">
+    <h1>Estadísticas</h1>
+    <span class="sub" id="period-label"></span>
+  </div>
+</div>
+
+<!-- Mode + period navigator -->
+<div class="mode-bar">
+  <div class="mode-pills">
+    <div class="mode-pill active" data-mode="week" onclick="setMode('week')">Semanas</div>
+    <div class="mode-pill"       data-mode="month" onclick="setMode('month')">Meses</div>
+  </div>
+  <div class="period-nav">
+    <button class="pnav-btn" onclick="shiftPeriod(-1)">&#8592;</button>
+    <span class="pnav-label" id="pnav-label"></span>
+    <button class="pnav-btn" onclick="shiftPeriod(1)">&#8594;</button>
+    <button class="pnav-btn pnav-now" id="pnav-now" onclick="goCurrent()">Actual</button>
+  </div>
+</div>
+
+<main>
+  <!-- Big totals -->
+  <div class="totals-grid" id="totals-grid"></div>
+
+  <!-- Bar chart -->
+  <p class="sec" id="chart-label">Distribución</p>
+  <div class="card chart-card">
+    <div class="bar-chart" id="bar-chart"></div>
+    <div class="chart-legend" id="chart-legend"></div>
+  </div>
+
+  <!-- Per-type breakdown -->
+  <p class="sec">Desglose por tipo</p>
+  <div class="card" id="breakdown"></div>
+
+  <!-- Session list for period -->
+  <p class="sec">Sesiones del período</p>
+  <div id="session-list">
+    <p style="color:var(--hint);font-size:13px;text-align:center;padding:1rem">Sin sesiones</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+<script src="shared.js"></script>
+<script src="stats.js"></script>
+</body>
+</html>
