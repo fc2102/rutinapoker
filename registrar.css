@@ -1,19 +1,129 @@
-.stars-row { display: flex; gap: 4px; margin-top: 3px; }
+/* ---- Type pills ---- */
+.type-pills-row {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 0 .75rem .25rem;
+}
+.type-pill {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 0.5px solid var(--border);
+  background: var(--bg); color: var(--muted);
+  cursor: pointer; font-size: 11px; font-family: var(--ff); font-weight: 500;
+  transition: all .15s; user-select: none; flex: 1; min-width: 60px;
+}
+.type-pill:first-child { font-size: 16px; }
+.type-pill span { font-size: 11px; }
+.type-pill:hover  { border-color: var(--green-d); }
+.type-pill.active {
+  border-color: var(--green-d);
+  background: rgba(15,77,46,.09);
+  color: var(--green-d); font-weight: 700;
+}
+
+/* ---- Duration row ---- */
+.duration-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.dur-label { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+.dur-presets { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.dur-btn {
+  padding: 5px 10px; border-radius: var(--radius-sm);
+  border: 0.5px solid var(--border); background: var(--bg2);
+  font-size: 11px; font-family: var(--ff); font-weight: 600;
+  color: var(--muted); cursor: pointer; transition: all .15s;
+}
+.dur-btn:hover  { border-color: var(--green-d); color: var(--green-d); }
+.dur-btn.active { border-color: var(--green-d); background: rgba(15,77,46,.09); color: var(--green-d); }
+.dur-input-wrap { display: flex; align-items: center; gap: 4px; }
+.dur-input-wrap input { width: 58px; text-align: center; }
+.dur-unit { font-size: 13px; color: var(--muted); }
+
+/* ---- Mental ---- */
+.mental-card { padding: .875rem 1rem; }
+.mental-labels-row {
+  display: flex; justify-content: space-between;
+  font-size: 9px; color: var(--hint); margin-bottom: 6px;
+  font-family: var(--fm);
+}
+.stars-row { display: flex; gap: 2px; justify-content: space-between; }
 .star {
-  font-size: 24px; cursor: pointer;
+  flex: 1; text-align: center;
+  font-size: 28px; cursor: pointer;
   transition: color .1s, transform .1s;
-  user-select: none; color: var(--hint);
+  user-select: none; color: var(--hint); line-height: 1;
 }
 .star.active { color: var(--gold); }
-.star:hover  { transform: scale(1.15); }
-.mental-label { font-size: 11px; color: var(--hint); margin-top: 3px; }
-
-.session-card {
-  background: var(--bg);
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: .875rem 1rem;
-  margin-bottom: 8px;
+.star:hover  { transform: scale(1.2); }
+.mental-val {
+  text-align: center; font-size: 12px; font-weight: 700;
+  color: var(--muted); margin-top: 6px;
 }
+
+/* ---- Save button ---- */
+.save-btn { margin: .75rem .75rem 0; width: calc(100% - 1.5rem); }
+
+/* ---- History header ---- */
+.history-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem .75rem .6rem;
+}
+.history-count { font-size: 11px; color: var(--hint); font-family: var(--fm); }
+
+/* ---- Session cards ---- */
+.session-card {
+  background: var(--bg); border: 0.5px solid var(--border);
+  border-radius: var(--radius); padding: .875rem 1rem;
+  margin: 0 .75rem 8px; transition: border-color .15s;
+}
+.session-card:hover { border-color: rgba(0,0,0,.18); }
 .session-card-top { display: flex; align-items: flex-start; gap: 10px; }
-.session-actions  { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.session-actions  { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.sess-type-badge {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px;
+  font-weight: 600; white-space: nowrap;
+}
+
+/* ---- Confirm delete modal ---- */
+.confirm-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.4); z-index: 49;
+}
+.confirm-overlay.open { display: block; }
+.confirm-modal {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(.92);
+  width: min(320px, calc(100vw - 32px));
+  background: var(--bg); border-radius: var(--radius);
+  border: 0.5px solid var(--border);
+  padding: 1.5rem 1.25rem;
+  text-align: center; z-index: 50;
+  opacity: 0; transition: transform .2s ease, opacity .2s ease;
+}
+.confirm-modal.open {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+.confirm-icon  { font-size: 32px; margin-bottom: .5rem; }
+.confirm-title { font-size: 16px; font-weight: 700; margin-bottom: .4rem; }
+.confirm-desc  { font-size: 13px; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.5; }
+.confirm-btns  { display: flex; gap: 8px; }
+.confirm-btns .btn { flex: 1; }
+
+/* ---- Date groups in history ---- */
+.date-group { margin-bottom: 4px; }
+.date-group-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .6rem .75rem .3rem;
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: capitalize;
+}
+.date-group-label { font-size: 12px; }
+.date-group-total { font-family: var(--fm); color: var(--green-l); font-size: 12px; }
+
+/* ---- Delete button ---- */
+.del-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 14px; padding: 2px 3px; opacity: .45;
+  transition: opacity .15s;
+}
+.del-btn:hover { opacity: 1; }

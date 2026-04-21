@@ -8,59 +8,101 @@
 <link rel="stylesheet" href="registrar.css">
 </head>
 <body>
+
 <div class="page-header">
   <a class="back-btn" href="index.html">← Inicio</a>
   <h1>Registrar sesión</h1>
 </div>
 
 <main>
+
+  <!-- Tipo de sesión: pills -->
+  <p class="sec" style="margin-top:.75rem">Tipo de sesión</p>
+  <div class="type-pills-row" id="type-pills-row">
+    <div class="type-pill active" data-type="estudio"  onclick="selectType(this)">📚<span>Estudio</span></div>
+    <div class="type-pill"        data-type="coaching" onclick="selectType(this)">🎓<span>Coaching</span></div>
+    <div class="type-pill"        data-type="juego"    onclick="selectType(this)">♠<span>Grind</span></div>
+    <div class="type-pill"        data-type="revision" onclick="selectType(this)">🔍<span>Revisión</span></div>
+    <div class="type-pill"        data-type="gym"      onclick="selectType(this)">💪<span>Gym</span></div>
+    <div class="type-pill"        data-type="otros"    onclick="selectType(this)">📌<span>Otros</span></div>
+  </div>
+
+  <!-- Fecha / hora / duración -->
+  <p class="sec">Cuándo y cuánto</p>
   <div class="card form-col">
-    <div class="frow">
-      <div class="fg">
-        <label>Tipo de sesión</label>
-        <select id="log-type">
-          <option value="estudio">📚 Estudio</option>
-          <option value="coaching">🎓 Coaching</option>
-          <option value="juego">♠ Juego / Grind</option>
-          <option value="revision">🔍 Revisión de manos</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label>Duración (horas)</label>
-        <input type="number" id="log-hours" min="0.25" max="24" step="0.25" value="1">
-      </div>
-    </div>
     <div class="frow">
       <div class="fg"><label>Fecha</label><input type="date" id="log-date"></div>
       <div class="fg"><label>Hora inicio</label><input type="time" id="log-time" value="10:00"></div>
     </div>
+    <div class="duration-row">
+      <span class="dur-label">Duración</span>
+      <div class="dur-presets">
+        <button class="dur-btn" onclick="setHours(0.5)">30m</button>
+        <button class="dur-btn" onclick="setHours(1)">1h</button>
+        <button class="dur-btn" onclick="setHours(1.5)">1.5h</button>
+        <button class="dur-btn" onclick="setHours(2)">2h</button>
+        <button class="dur-btn" onclick="setHours(3)">3h</button>
+      </div>
+      <div class="dur-input-wrap">
+        <input type="number" id="log-hours" min="0.25" max="24" step="0.25" value="1">
+        <span class="dur-unit">h</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido y notas -->
+  <p class="sec">Contenido</p>
+  <div class="card form-col">
     <div class="fg">
-      <label>Tema / contenido</label>
+      <label>Tema</label>
       <input type="text" id="log-topic" placeholder="ej. 3-bet ranges, sesión con coach, NL25 cash...">
     </div>
     <div class="fg">
       <label>Notas de sesión</label>
       <textarea id="log-notes" placeholder="¿Cómo fue? Situaciones clave, lecturas, qué mejorar..."></textarea>
     </div>
-    <div class="fg">
-      <label>Estado mental</label>
-      <div class="stars-row" id="stars-row">
-        <span class="star active" data-v="1" onclick="setMental(1)">★</span>
-        <span class="star active" data-v="2" onclick="setMental(2)">★</span>
-        <span class="star active" data-v="3" onclick="setMental(3)">★</span>
-        <span class="star"        data-v="4" onclick="setMental(4)">★</span>
-        <span class="star"        data-v="5" onclick="setMental(5)">★</span>
-      </div>
-      <span class="mental-label" id="mental-label">Neutral</span>
-    </div>
-    <button class="btn btn-p btn-block" onclick="logSession()">Guardar sesión</button>
   </div>
 
-  <p class="sec">Historial completo</p>
+  <!-- Estado mental -->
+  <p class="sec">Estado mental</p>
+  <div class="card mental-card">
+    <div class="mental-labels-row">
+      <span>Muy mal</span><span>Mal</span><span>Neutral</span><span>Bien</span><span>Excelente</span>
+    </div>
+    <div class="stars-row" id="stars-row">
+      <span class="star active" data-v="1" onclick="setMental(1)">★</span>
+      <span class="star active" data-v="2" onclick="setMental(2)">★</span>
+      <span class="star active" data-v="3" onclick="setMental(3)">★</span>
+      <span class="star"        data-v="4" onclick="setMental(4)">★</span>
+      <span class="star"        data-v="5" onclick="setMental(5)">★</span>
+    </div>
+    <div class="mental-val" id="mental-label">Neutral</div>
+  </div>
+
+  <button class="btn btn-p btn-block save-btn" onclick="logSession()">Guardar sesión</button>
+
+  <!-- Historial -->
+  <div class="history-header">
+    <p class="sec" style="margin:0">Historial</p>
+    <span class="history-count" id="history-count"></span>
+  </div>
   <div id="history-list">
     <div class="empty-state"><div class="icon">📋</div><p>Sin sesiones registradas</p></div>
   </div>
+
 </main>
+
+<!-- Confirm delete modal -->
+<div class="confirm-overlay" id="confirm-overlay"></div>
+<div class="confirm-modal" id="confirm-modal" style="display:none">
+  <div class="confirm-icon">🗑️</div>
+  <div class="confirm-title">¿Eliminar sesión?</div>
+  <div class="confirm-desc" id="confirm-desc"></div>
+  <div class="confirm-btns">
+    <button class="btn btn-ghost" onclick="cancelDelete()">Cancelar</button>
+    <button class="btn btn-danger" onclick="confirmDelete()">Eliminar</button>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 <script src="shared.js"></script>
