@@ -8,66 +8,118 @@
 <link rel="stylesheet" href="index.css">
 </head>
 <body>
-<div class="home-header">
-  <div class="suit">♠</div>
-  <div>
-    <h1>Poker Tracker</h1>
-    <p id="today-label"></p>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-top">
+    <div class="hero-left">
+      <div class="hero-suit">♠</div>
+      <div>
+        <div class="hero-title">Poker Tracker</div>
+        <div class="hero-date" id="today-label"></div>
+      </div>
+    </div>
+    <a href="stats.html" class="hero-stats-btn">📊 Stats</a>
+  </div>
+
+  <div class="hero-kpis">
+    <div class="kpi">
+      <div class="kpi-val" id="stat-total">0h</div>
+      <div class="kpi-lbl">Esta semana</div>
+    </div>
+    <div class="kpi-sep"></div>
+    <div class="kpi">
+      <div class="kpi-val" id="stat-study">0h</div>
+      <div class="kpi-lbl">Estudio</div>
+    </div>
+    <div class="kpi-sep"></div>
+    <div class="kpi">
+      <div class="kpi-val" id="stat-game">0h</div>
+      <div class="kpi-lbl">Grind</div>
+    </div>
+    <div class="kpi-sep"></div>
+    <div class="kpi">
+      <div class="kpi-val" id="br-display">€0</div>
+      <div class="kpi-lbl">Bankroll</div>
+    </div>
   </div>
 </div>
 
-<div class="nav-grid">
-  <a class="nav-card" href="registrar.html"><div class="icon">📝</div><div class="label">Registrar</div><div class="sub">Lo que hice</div></a>
-  <a class="nav-card" href="calendario.html"><div class="icon">📅</div><div class="label">Horario</div><div class="sub">Lo que planeo</div></a>
-  <a class="nav-card" href="clases.html"><div class="icon">🎓</div><div class="label">Clases</div><div class="sub" id="nav-clases">—</div></a>
-  <a class="nav-card" href="habitos.html"><div class="icon">✅</div><div class="label">Hábitos</div><div class="sub" id="nav-habitos">—</div></a>
-  <a class="nav-card" href="bankroll.html"><div class="icon">💶</div><div class="label">Bankroll</div><div class="sub" id="nav-bankroll">—</div></a>
-  <a class="nav-card" href="notas.html"><div class="icon">📓</div><div class="label">Notas</div><div class="sub" id="nav-notas">—</div></a>
-  <a class="nav-card" href="stats.html" style="grid-column:span 3"><div class="icon">📊</div><div class="label">Estadísticas</div><div class="sub">Horas por semana o mes</div></a>
-</div>
+<!-- ═══ QUICK NAV ═══ -->
+<nav class="qnav-bar">
+  <a class="qnav-item" href="registrar.html">
+    <div class="qnav-bubble">📝</div>
+    <div class="qnav-lbl">Registrar</div>
+  </a>
+  <a class="qnav-item" href="calendario.html">
+    <div class="qnav-bubble">📅</div>
+    <div class="qnav-lbl">Horario</div>
+  </a>
+  <a class="qnav-item" href="habitos.html">
+    <div class="qnav-bubble">✅</div>
+    <div class="qnav-lbl" id="nav-habitos">Hábitos</div>
+  </a>
+  <a class="qnav-item" href="clases.html">
+    <div class="qnav-bubble">🎓</div>
+    <div class="qnav-lbl" id="nav-clases">Clases</div>
+  </a>
+  <a class="qnav-item" href="bankroll.html">
+    <div class="qnav-bubble">💶</div>
+    <div class="qnav-lbl">Bankroll</div>
+  </a>
+  <a class="qnav-item" href="notas.html">
+    <div class="qnav-bubble">📓</div>
+    <div class="qnav-lbl" id="nav-notas">Notas</div>
+  </a>
+</nav>
 
 <main>
-  <!-- Day selector + plan vs realidad -->
-  <div class="day-selector-row">
-    <p class="sec" style="margin:0">Plan vs realidad</p>
-    <div class="day-nav">
-      <button class="day-nav-btn" onclick="shiftDay(-1)">&#8592;</button>
-      <span class="day-nav-label" id="day-nav-label"></span>
-      <button class="day-nav-btn" onclick="shiftDay(1)">&#8594;</button>
-      <button class="day-nav-btn today-pill" onclick="goToday()" id="today-pill" style="display:none">Hoy</button>
+
+  <!-- ═══ TODAY SECTION ═══ -->
+  <div class="today-header">
+    <div class="today-nav">
+      <button class="tnav-btn" onclick="shiftDay(-1)">‹</button>
+      <div class="tnav-center">
+        <span class="tnav-label" id="day-nav-label"></span>
+        <button class="tnav-today" id="today-pill" onclick="goToday()" style="display:none">Hoy</button>
+      </div>
+      <button class="tnav-btn" onclick="shiftDay(1)">›</button>
     </div>
+    <div class="day-strip" id="day-strip"></div>
   </div>
 
-  <!-- Day strip (7 days of current week) -->
-  <div class="day-strip" id="day-strip"></div>
-
+  <!-- Plan vs realidad -->
   <div class="pvr-card" id="pvr-card"></div>
 
-  <!-- Stats semana -->
-  <p class="sec">Esta semana · horas reales</p>
-  <div class="stats-grid">
-    <div class="sc"><div class="sv green" id="stat-study">0h</div><div class="sl">Estudio</div></div>
-    <div class="sc"><div class="sv gold"  id="stat-coaching">0h</div><div class="sl">Coaching</div></div>
-    <div class="sc"><div class="sv"       id="stat-game">0h</div><div class="sl">Juego</div></div>
+  <!-- ═══ WEEK CHART ═══ -->
+  <div class="section-row">
+    <span class="sec-title">Actividad semanal</span>
+    <a href="stats.html" class="see-all">Ver todo →</a>
   </div>
-
-  <p class="sec">Actividad diaria</p>
-  <div class="card">
+  <div class="chart-card">
     <div class="week-bar" id="week-chart"></div>
-    <div class="chart-legend">
-      <span class="leg"><span class="leg-dot" style="background:#3B8BD4"></span>Estudio</span>
-      <span class="leg"><span class="leg-dot" style="background:var(--gold)"></span>Coaching</span>
-      <span class="leg"><span class="leg-dot" style="background:var(--green)"></span>Juego</span>
+    <div class="chart-leg">
+      <span class="cleg"><span class="cleg-dot" style="background:#3B8BD4"></span>Estudio</span>
+      <span class="cleg"><span class="cleg-dot" style="background:var(--gold)"></span>Coaching</span>
+      <span class="cleg"><span class="cleg-dot" style="background:var(--green-d)"></span>Juego</span>
     </div>
   </div>
 
-  <p class="sec">Objetivos semanales</p>
-  <div class="card" id="goals-section"></div>
-
-  <p class="sec">Últimas sesiones</p>
-  <div class="card" id="recent-sessions">
-    <p style="color:var(--hint);font-size:13px;text-align:center;padding:.5rem 0">Sin sesiones aún</p>
+  <!-- ═══ GOALS ═══ -->
+  <div class="section-row">
+    <span class="sec-title">Objetivos semana</span>
   </div>
+  <div class="goals-card" id="goals-section"></div>
+
+  <!-- ═══ RECENT ═══ -->
+  <div class="section-row">
+    <span class="sec-title">Últimas sesiones</span>
+    <a href="registrar.html" class="see-all">Ver todo →</a>
+  </div>
+  <div class="recent-card" id="recent-sessions">
+    <p class="empty-msg">Sin sesiones aún</p>
+  </div>
+
 </main>
 
 <div class="toast" id="toast"></div>
