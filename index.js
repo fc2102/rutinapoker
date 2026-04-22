@@ -1,9 +1,9 @@
-// index.js — Dashboard
+// index.js — Dashboard (fullscreen day view)
 
-let state = loadState();
-const today    = new Date();
+let state    = loadState();
+const today  = new Date();
 const todayStr = todayISO();
-let viewDate   = todayStr;
+let viewDate = todayStr;
 
 // ---- Header date ----
 document.getElementById('today-label').textContent =
@@ -17,61 +17,52 @@ function dateISO(d) {
   return `${y}-${m}-${dd}`;
 }
 function getMondayOf(d) {
-  const date = new Date(d); const dow = date.getDay();
-  date.setDate(date.getDate() - (dow === 0 ? 6 : dow - 1));
-  return date;
+  const r = new Date(d); const dow = r.getDay();
+  r.setDate(r.getDate() - (dow === 0 ? 6 : dow - 1));
+  return r;
 }
 function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
-
-function getWeekSessions() {
-  const mon = getMondayOf(today); mon.setHours(0,0,0,0);
-  return (state.sessions || []).filter(s => {
-    const d = new Date(s.date + 'T00:00:00');
-    return d >= mon && d <= today;
-  });
-}
 function timeToMins(str) {
   if (!str) return null;
-  const [h, m] = str.split(':').map(Number);
-  return h * 60 + (m || 0);
+  const [h, m] = str.split(':').map(Number); return h * 60 + (m || 0);
+}
+function getWeekSessions() {
+  const mon = getMondayOf(today); mon.setHours(0,0,0,0);
+  return (state.sessions||[]).filter(s => {
+    const d = new Date(s.date + 'T00:00:00'); return d >= mon && d <= today;
+  });
 }
 
-// ---- Render all ----
-function renderAll() {
-  renderKPIs();
-  renderNavBadges();
-  renderDayView();
-  renderWeekChart();
-  renderGoals();
-  renderRecent();
-}
-
-// ---- KPIs (hero) ----
-function renderKPIs() {
-  const week   = getWeekSessions();
-  const totals = { estudio:0, coaching:0, juego:0 };
-  week.forEach(s => { if (totals[s.type] !== undefined) totals[s.type] += parseFloat(s.hours||0); });
-  const total = Object.values(totals).reduce((a,b) => a+b, 0);
-
-  document.getElementById('stat-total').textContent   = total.toFixed(1) + 'h';
-  document.getElementById('stat-study').textContent   = totals.estudio.toFixed(1) + 'h';
-  document.getElementById('stat-game').textContent    = totals.juego.toFixed(1) + 'h';
-
-  const brTotal = (state.bankroll?.initial||0) + (state.bankroll?.weeks||[]).reduce((a,w) => a + parseFloat(w.result||0), 0);
-  document.getElementById('br-display').textContent = '€' + brTotal.toFixed(0);
-
-  // Store totals for goals
-  window._weekTotals = totals;
+// ---- More menu ----
+function toggleMore() {
+  document.getElementById('more-menu').classList.toggle('open');
+  document.getElementById('more-overlay').classList.toggle('open');
 }
 
 // ---- Nav badges ----
 function renderNavBadges() {
-  const pending   = (state.lessons||[]).filter(l => !l.done).length;
+  const pending = (state.lessons||[]).filter(l => !l.done).length;
   document.getElementById('nav-clases').textContent  = pending ? pending + ' pend.' : 'Clases';
-  const allHab    = Object.values(state.habits||{}).flat();
-  const habDone   = allHab.filter(h => h.done).length;
-  document.getElementById('nav-habitos').textContent = `${habDone}/${allHab.length}`;
-  document.getElementById('nav-notas').textContent   = (state.notes||[]).length + ' notas';
+  const allH    = Object.values(state.habits||{}).flat();
+  const habDone = allH.filter(h => h.done).length;
+  document.getElementById('nav-habitos').textContent = allH.length ? `${habDone}/${allH.length}` : 'Hábitos';
+  const brTotal = (state.bankroll?.initial||0) + (state.bankroll?.weeks||[]).reduce((a,w)=>a+parseFloat(w.result||0),0);
+  document.getElementById('nav-bankroll').textContent = '€' + brTotal.toFixed(0) + ' Bankroll';
+  document.getElementById('nav-notas').textContent    = (state.notes||[]).length + ' Notas';
+}
+
+// ---- KPIs (week totals in hero) ----
+function renderKPIs() {
+  const week   = getWeekSessions();
+  const totals = { estudio:0, coaching:0, juego:0 };
+  week.forEach(s => { if (totals[s.type]!==undefined) totals[s.type]+=parseFloat(s.hours||0); });
+  const total = Object.values(totals).reduce((a,b)=>a+b,0);
+  document.getElementById('hero-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-val">${total.toFixed(1)}h</div><div class="kpi-lbl">Semana</div></div>
+    <div class="kpi"><div class="kpi-val">${totals.estudio.toFixed(1)}h</div><div class="kpi-lbl">Estudio</div></div>
+    <div class="kpi"><div class="kpi-val">${totals.coaching.toFixed(1)}h</div><div class="kpi-lbl">Coaching</div></div>
+    <div class="kpi"><div class="kpi-val">${totals.juego.toFixed(1)}h</div><div class="kpi-lbl">Grind</div></div>`;
+  window._weekTotals = totals;
 }
 
 // ---- Day navigation ----
@@ -79,20 +70,34 @@ function shiftDay(n) {
   const d = new Date(viewDate + 'T12:00:00'); d.setDate(d.getDate() + n);
   viewDate = dateISO(d); renderDayView();
 }
-function goToday()    { viewDate = todayStr; renderDayView(); }
-function selectDay(ds){ viewDate = ds; renderDayView(); }
+function goToday()     { viewDate = todayStr; renderDayView(); }
+function selectDay(ds) { viewDate = ds; renderDayView(); }
 
-// ---- Day strip ----
-function renderDayStrip() {
-  const SHORT = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+// ---- Day label ----
+function renderDayLabel() {
+  const d       = new Date(viewDate + 'T12:00:00');
+  const isToday = viewDate === todayStr;
+  const isTomorrow = viewDate === dateISO(addDays(today, 1));
+  const isYesterday = viewDate === dateISO(addDays(today, -1));
+  let label;
+  if (isToday) label = 'Hoy · ' + d.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
+  else if (isTomorrow) label = 'Mañana · ' + d.toLocaleDateString('es-ES', { day:'numeric', month:'long' });
+  else if (isYesterday) label = 'Ayer · ' + d.toLocaleDateString('es-ES', { day:'numeric', month:'long' });
+  else label = d.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('day-nav-label').textContent = label;
+}
+
+// ---- Week strip ----
+function renderWeekStrip() {
+  const SHORT = ['L','M','X','J','V','S','D'];
   const mon   = getMondayOf(new Date(viewDate + 'T12:00:00'));
   document.getElementById('day-strip').innerHTML = Array.from({ length: 7 }, (_, i) => {
     const d   = addDays(mon, i);
     const ds  = dateISO(d);
-    const evs = [...(state.calEvents||[]).filter(e => e.date===ds), ...(state.sessions||[]).filter(s => s.date===ds)];
-    const dots = evs.slice(0,4).map(e => `<div class="dp-dot" style="background:${DOT_COLORS[e.type]||'#888'}"></div>`).join('');
-    const isTod = ds === todayStr, isSel = ds === viewDate;
-    return `<div class="dp${isTod?' tod':''}${isSel?' sel':''}" onclick="selectDay('${ds}')">
+    const evs = [...(state.calEvents||[]).filter(e=>e.date===ds), ...(state.sessions||[]).filter(s=>s.date===ds)];
+    const dots = evs.slice(0,3).map(e=>`<div class="dp-dot" style="background:${DOT_COLORS[e.type]||'#888'}"></div>`).join('');
+    const cls  = `dp${ds===todayStr?' tod':''}${ds===viewDate?' sel':''}`;
+    return `<div class="${cls}" onclick="selectDay('${ds}')">
       <div class="dp-d">${SHORT[i]}</div>
       <div class="dp-n">${d.getDate()}</div>
       <div class="dp-dots">${dots}</div>
@@ -100,242 +105,153 @@ function renderDayStrip() {
   }).join('');
 }
 
-// ---- Day label ----
-function renderDayLabel() {
-  const d       = new Date(viewDate + 'T12:00:00');
-  const isToday = viewDate === todayStr;
-  document.getElementById('day-nav-label').textContent =
-    isToday ? 'Hoy' : d.toLocaleDateString('es-ES', { weekday:'short', day:'numeric', month:'short' });
-  document.getElementById('today-pill').style.display = isToday ? 'none' : 'inline-flex';
-}
-
-// ---- Plan vs realidad — Timeline ----
-function renderPVR() {
-  const planned = (state.calEvents||[]).filter(e => e.date === viewDate);
-  const real    = (state.sessions||[]).filter(s => s.date === viewDate).map(s => ({...s}));
-  const el      = document.getElementById('pvr-card');
+// ---- Cards render ----
+function renderCards() {
+  const planned = (state.calEvents||[])
+    .filter(e => e.date === viewDate)
+    .sort((a,b) => (timeToMins(a.time)??9999) - (timeToMins(b.time)??9999));
+  const real = (state.sessions||[]).filter(s => s.date === viewDate).map(s => ({...s}));
+  const el   = document.getElementById('pvr-card');
 
   if (!planned.length && !real.length) {
-    el.innerHTML = `<div class="pvr-empty">
+    el.innerHTML = `<div class="pvr-empty-screen">
       <div class="pvr-empty-icon">📋</div>
-      <div>Sin actividades este día</div>
-      <div class="pvr-links">
-        <a class="pvr-link" href="calendario.html">+ Planificar</a>
-        <a class="pvr-link" href="registrar.html">+ Registrar</a>
+      <div class="pvr-empty-title">Sin actividades este día</div>
+      <div class="pvr-empty-sub">Planifica tu día en el horario<br>o registra una sesión</div>
+      <div class="pvr-empty-btns">
+        <a class="pvr-empty-btn" href="calendario.html">📅 Planificar</a>
+        <a class="pvr-empty-btn" href="registrar.html">📝 Registrar</a>
       </div>
     </div>`;
     return;
   }
 
   const nowMins = viewDate === todayStr
-    ? new Date().getHours() * 60 + new Date().getMinutes()
+    ? today.getHours() * 60 + today.getMinutes()
     : 24 * 60;
 
-  // Sort planned events by start time
-  const sortedPlanned = [...planned].sort((a,b) => {
-    const aM = timeToMins(a.time) ?? 9999;
-    const bM = timeToMins(b.time) ?? 9999;
-    return aM - bM;
-  });
+  const cards = [];
+  let doneCount = 0, missedCount = 0, pendCount = 0;
+  let planTotal = 0, realTotal = 0;
 
-  // Build timeline items (planned + extras)
-  const items = [];
-
-  sortedPlanned.forEach(ev => {
+  // Planned event cards
+  planned.forEach(ev => {
     const color  = DOT_COLORS[ev.type] || '#888';
     const label  = ev.desc || TYPE_LABELS[ev.type] || ev.type;
     const evS    = timeToMins(ev.time);
     const evE    = ev.endTime ? timeToMins(ev.endTime) : (evS !== null ? evS + Math.round((ev.hours||1)*60) : null);
+    const timeStr = ev.time
+      ? `${ev.time}${ev.endTime ? ' – ' + ev.endTime : ''}`
+      : '';
     const match  = real.find(s => s.type === ev.type && !s._matched);
+    const planH  = ev.hours || 0;
+    planTotal += planH;
 
-    let status, realH, planH = ev.hours || 0, diff = 0;
+    let status, realH = 0, diff = 0;
     if (match) {
       match._matched = true;
-      realH  = parseFloat(match.hours||0);
-      diff   = realH - planH;
-      status = 'done';
+      realH   = parseFloat(match.hours || 0);
+      diff    = realH - planH;
+      status  = 'done'; doneCount++;
+      realTotal += realH;
     } else if (evE !== null && evE < nowMins) {
-      status = 'missed'; realH = 0;
+      status = 'missed'; missedCount++;
     } else {
-      status = 'pending'; realH = null;
+      status = 'pending'; pendCount++;
     }
 
-    items.push({ ev, label, color, status, planH, realH, diff, evS, evE });
-  });
+    const barPct = status === 'done' && planH > 0
+      ? Math.min(100, (realH / planH) * 100) : 0;
 
-  // Extra (unplanned) sessions
-  real.filter(s => !s._matched).forEach(s => {
-    items.push({
-      extra: true,
-      label: s.topic || TYPE_LABELS[s.type] || s.type,
-      color: DOT_COLORS[s.type] || '#888',
-      type:  s.type,
-      hours: parseFloat(s.hours||0),
-      time:  s.time,
-      evS:   timeToMins(s.time),
-    });
-  });
+    const badgeHtml = {
+      done:    `<span class="act-badge badge-done">✓ Hecho</span>`,
+      missed:  `<span class="act-badge badge-missed">✗ No hecho</span>`,
+      pending: `<span class="act-badge badge-pending">Pendiente</span>`,
+    }[status];
 
-  // Sort all by start time
-  items.sort((a,b) => (a.evS??9999) - (b.evS??9999));
-
-  // Render timeline
-  const tlItems = items.map((it, idx) => {
-    const isLast = idx === items.length - 1;
-
-    if (it.extra) {
-      const timeStr = it.time || '';
-      return `
-        <div class="tl-item tl-extra">
-          <div class="tl-left">
-            <div class="tl-time">${timeStr}</div>
-            <div class="tl-line-wrap">
-              <div class="tl-node" style="background:${it.color};border-color:${it.color}"></div>
-              ${!isLast ? '<div class="tl-line"></div>' : ''}
-            </div>
-          </div>
-          <div class="tl-card tl-card-extra">
-            <div class="tl-card-top">
-              <span class="tl-label">${escapeHtml(it.label)}</span>
-              <span class="tl-badge tl-badge-extra">+ Extra</span>
-            </div>
-            <div class="tl-meta" style="color:${it.color}">${it.hours.toFixed(1)}h · no planificado</div>
-          </div>
-        </div>`;
-    }
-
-    const { ev, label, color, status, planH, realH, diff, evS, evE } = it;
-    const startStr  = ev.time || '';
-    const endStr    = ev.endTime || '';
-    const timeRange = startStr ? `${startStr}${endStr?' – '+endStr:''}` : '';
-
-    // Progress bar width for done/partial
-    const barW = status === 'done' && planH > 0
-      ? Math.min(100, (realH/planH)*100)
-      : status === 'missed' ? 0 : null;
-
-    const badgeMap = {
-      done:    `<span class="tl-badge tl-badge-done">✓ Hecho</span>`,
-      missed:  `<span class="tl-badge tl-badge-missed">✗ No hecho</span>`,
-      pending: `<span class="tl-badge tl-badge-pending">· · ·</span>`,
-    };
-
-    const hoursLine = status === 'done'
-      ? `${realH.toFixed(1)}h <span class="tl-plan-ref">/ ${planH.toFixed(1)}h plan</span>${Math.abs(diff)>=0.25 ? ` <span style="color:${diff>0?'var(--green-l)':'var(--red)'}">${diff>0?'+':''}${diff.toFixed(1)}h</span>` : ''}`
+    const hoursHtml = status === 'done'
+      ? `<div class="act-hours-row">
+           <div class="act-hours-real">${realH.toFixed(1)}h</div>
+           <div class="act-hours-plan">/ ${planH.toFixed(1)}h plan</div>
+           ${Math.abs(diff) >= 0.25
+             ? `<div class="act-hours-diff ${diff>0?'diff-pos':'diff-neg'}">${diff>0?'+':''}${diff.toFixed(1)}h</div>`
+             : ''}
+         </div>
+         <div class="act-progress"><div class="act-progress-fill" style="width:${barPct}%;background:${color}"></div></div>`
       : status === 'missed'
-        ? `<span style="color:var(--red)">0h / ${planH.toFixed(1)}h plan</span>`
-        : `${planH.toFixed(1)}h planificado`;
+        ? `<div class="act-hours-row"><div class="act-hours-real" style="color:var(--red)">0h</div><div class="act-hours-plan">/ ${planH.toFixed(1)}h plan</div></div>`
+        : `<div class="act-hours-row"><div class="act-hours-real" style="color:var(--hint)">${planH.toFixed(1)}h</div><div class="act-hours-plan">planificado</div></div>`;
 
-    const progressBar = barW !== null ? `
-      <div class="tl-progress">
-        <div class="tl-progress-fill" style="width:${barW}%;background:${color}"></div>
-      </div>` : '';
-
-    return `
-      <div class="tl-item tl-${status}">
-        <div class="tl-left">
-          <div class="tl-time">${timeRange}</div>
-          <div class="tl-line-wrap">
-            <div class="tl-node tl-node-${status}" style="${status==='done'?'background:'+color+';border-color:'+color:status==='missed'?'border-color:var(--red)':'border-color:'+color}"></div>
-            ${!isLast ? '<div class="tl-line"></div>' : ''}
-          </div>
-        </div>
-        <div class="tl-card tl-card-${status}">
-          <div class="tl-card-top">
-            <div class="tl-label-wrap">
-              <span class="tl-type-dot" style="background:${color}"></span>
-              <span class="tl-label">${escapeHtml(label)}</span>
+    cards.push(`
+      <div class="act-card ${status}">
+        <div class="act-card-bar" style="background:${color}"></div>
+        <div class="act-card-body">
+          <div class="act-card-top">
+            <div class="act-card-left">
+              <div class="act-name">${escapeHtml(label)}</div>
+              ${timeStr ? `<div class="act-time">${timeStr} · ${planH}h</div>` : ''}
             </div>
-            ${badgeMap[status]}
+            ${badgeHtml}
           </div>
-          <div class="tl-meta">${hoursLine}</div>
-          ${progressBar}
+          ${hoursHtml}
         </div>
-      </div>`;
-  }).join('');
+      </div>`);
+  });
 
-  // Summary footer
-  const planH  = planned.reduce((a,e) => a+(e.hours||0), 0);
-  const realH  = real.reduce((a,s) => a+parseFloat(s.hours||0), 0);
-  const pct    = planH > 0 ? Math.round(realH/planH*100) : null;
-  const pctC   = pct===null?'':pct>=80?'var(--green-l)':pct>=50?'var(--gold)':'var(--red)';
-  const doneCount   = items.filter(it => it.status==='done').length;
-  const missedCount = items.filter(it => it.status==='missed').length;
-  const pendCount   = items.filter(it => it.status==='pending').length;
+  // Extra (unplanned) session cards
+  real.filter(s => !s._matched).forEach(s => {
+    const color  = DOT_COLORS[s.type] || '#888';
+    const label  = s.topic || TYPE_LABELS[s.type] || s.type;
+    const realH  = parseFloat(s.hours || 0);
+    realTotal += realH;
+    cards.push(`
+      <div class="act-card extra">
+        <div class="act-card-bar" style="background:${color}"></div>
+        <div class="act-card-body">
+          <div class="act-card-top">
+            <div class="act-card-left">
+              <div class="act-name">${escapeHtml(label)}</div>
+              ${s.time ? `<div class="act-time">${s.time} · ${realH.toFixed(1)}h</div>` : ''}
+            </div>
+            <span class="act-badge badge-extra">+ Extra</span>
+          </div>
+          <div class="act-hours-row">
+            <div class="act-hours-real">${realH.toFixed(1)}h</div>
+            <div class="act-hours-plan">no planificado</div>
+          </div>
+        </div>
+      </div>`);
+  });
 
-  const footer = `
-    <div class="tl-footer">
-      <div class="tl-footer-stats">
-        <span class="tl-fstat done-c">✓ ${doneCount} hecho${doneCount!==1?'s':''}</span>
-        ${missedCount>0?`<span class="tl-fstat missed-c">✗ ${missedCount} perdido${missedCount!==1?'s':''}</span>`:''}
-        ${pendCount>0?`<span class="tl-fstat pend-c">· ${pendCount} pendiente${pendCount!==1?'s':''}</span>`:''}
+  // Summary card at bottom
+  const pct   = planTotal > 0 ? Math.round(realTotal / planTotal * 100) : null;
+  const pctC  = pct === null ? 'var(--muted)' : pct >= 80 ? 'var(--green-l)' : pct >= 50 ? 'var(--gold)' : 'var(--red)';
+  const summary = `
+    <div class="pvr-summary-strip">
+      <div class="pvr-sum-chips">
+        ${doneCount  > 0 ? `<span class="pvr-sum-chip chip-done">✓ ${doneCount} hecho${doneCount!==1?'s':''}</span>` : ''}
+        ${missedCount> 0 ? `<span class="pvr-sum-chip chip-missed">✗ ${missedCount} perdido${missedCount!==1?'s':''}</span>` : ''}
+        ${pendCount  > 0 ? `<span class="pvr-sum-chip chip-pend">${pendCount} pendiente${pendCount!==1?'s':''}</span>` : ''}
+        ${real.filter(s=>!s._matched).length > 0 ? `<span class="pvr-sum-chip" style="color:#3B8BD4">+${real.filter(s=>!s._matched).length} extra</span>` : ''}
       </div>
-      ${pct!==null?`<div class="tl-footer-pct" style="color:${pctC}">${realH.toFixed(1)}h / ${planH.toFixed(1)}h · <strong>${pct}%</strong></div>`:''}
+      ${pct !== null ? `<div class="pvr-pct" style="color:${pctC}">${pct}%</div>` : ''}
     </div>`;
 
-  el.innerHTML = `<div class="tl-wrap">${tlItems}</div>${footer}`;
+  el.innerHTML = cards.join('') + summary;
 }
 
-function renderDayView() { renderDayLabel(); renderDayStrip(); renderPVR(); }
-
-// ---- Week chart ----
-function renderWeekChart() {
-  const DNAMES = ['L','M','X','J','V','S','D'];
-  const dow = today.getDay(), mo = dow===0?6:dow-1;
-  let maxH = 0; const bars = [];
-  for (let i = 0; i < 7; i++) {
-    const d  = new Date(today); d.setDate(today.getDate()-mo+i);
-    const ds = dateISO(d);
-    const hrs = (state.sessions||[]).filter(s=>s.date===ds).reduce((a,s)=>a+parseFloat(s.hours||0),0);
-    if (hrs > maxH) maxH = hrs;
-    bars.push({ label:DNAMES[i], hrs, isToday:ds===todayStr, ds });
-  }
-  if (maxH < 1) maxH = 1;
-  document.getElementById('week-chart').innerHTML = bars.map(b => `
-    <div class="wday" onclick="selectDay('${b.ds}')">
-      <div class="wbar-wrap">
-        <div class="wbar" style="height:${Math.max(2,(b.hrs/maxH)*68)}px;background:${b.isToday?'#3B8BD4':'var(--green-d)'}"></div>
-      </div>
-      <div class="wlbl" style="font-weight:${b.isToday?700:400};color:${b.isToday?'var(--text)':'var(--hint)'}">${b.label}</div>
-    </div>`).join('');
+function renderDayView() {
+  renderDayLabel();
+  renderWeekStrip();
+  renderCards();
 }
 
-// ---- Goals ----
-function renderGoals() {
-  const totals = window._weekTotals || { estudio:0, coaching:0, juego:0 };
-  const GC = { estudio:'#3B8BD4', coaching:'var(--gold)', juego:'var(--green-l)' };
-  const GL = { estudio:'Estudio', coaching:'Coaching', juego:'Juego' };
-  const goals = state.goals || { estudio:10, coaching:3, juego:15 };
-  document.getElementById('goals-section').innerHTML = Object.keys(goals).map(k => {
-    const pct = Math.min(100, (totals[k]||0)/(goals[k]||1)*100);
-    return `<div class="goal-row">
-      <span class="gl">${GL[k]}</span>
-      <div class="gb"><div class="gf" style="width:${pct}%;background:${GC[k]}"></div></div>
-      <span class="gp">${Math.round(pct)}%</span>
-    </div>
-    <div class="goal-sub">${(totals[k]||0).toFixed(1)}h / ${goals[k]}h</div>`;
-  }).join('');
+// ---- Full render ----
+function renderAll() {
+  renderNavBadges();
+  renderKPIs();
+  renderDayView();
 }
 
-// ---- Recent sessions ----
-function renderRecent() {
-  const sorted = [...(state.sessions||[])].sort((a,b) => new Date(b.date)-new Date(a.date)).slice(0,5);
-  const el = document.getElementById('recent-sessions');
-  if (!sorted.length) { el.innerHTML = '<p class="empty-msg">Sin sesiones aún</p>'; return; }
-  el.innerHTML = sorted.map(x => {
-    const color = DOT_COLORS[x.type]||'#888', label = TYPE_LABELS[x.type]||x.type;
-    const stars = x.mental ? '★'.repeat(x.mental) : '';
-    return `<div class="si">
-      <div class="dot" style="background:${color}"></div>
-      <div class="si-info">
-        <div class="si-title">${escapeHtml(x.topic||label)}</div>
-        <div class="si-meta">${x.date}${x.time?' · '+x.time:''}${stars?' · '+stars:''}</div>
-      </div>
-      <span class="si-hrs">${parseFloat(x.hours||0).toFixed(1)}h</span>
-    </div>`;
-  }).join('');
-}
-
-// ---- Init ----
 renderAll();
 initState(fresh => { state = fresh; renderAll(); });
