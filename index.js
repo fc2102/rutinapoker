@@ -105,19 +105,16 @@ function renderWeekStrip() {
   }).join('');
 }
 
-// ---- Cards render ----
+// ---- Plan vs realidad ----
 function renderCards() {
-  const planned = (state.calEvents||[])
-    .filter(e => e.date === viewDate)
-    .sort((a,b) => (timeToMins(a.time)??9999) - (timeToMins(b.time)??9999));
-  const real = (state.sessions||[]).filter(s => s.date === viewDate).map(s => ({...s}));
-  const el   = document.getElementById('pvr-card');
+  const planned = (state.calEvents||[]).filter(e => e.date === viewDate);
+  const real    = (state.sessions||[]).filter(s => s.date === viewDate);
+  const el      = document.getElementById('pvr-card');
 
   if (!planned.length && !real.length) {
     el.innerHTML = `<div class="pvr-empty-screen">
       <div class="pvr-empty-icon">📋</div>
       <div class="pvr-empty-title">Sin actividades este día</div>
-      <div class="pvr-empty-sub">Planifica tu día en el horario<br>o registra una sesión</div>
       <div class="pvr-empty-btns">
         <a class="pvr-empty-btn" href="calendario.html">📅 Planificar</a>
         <a class="pvr-empty-btn" href="registrar.html">📝 Registrar</a>
@@ -126,118 +123,79 @@ function renderCards() {
     return;
   }
 
-  const nowMins = viewDate === todayStr
-    ? today.getHours() * 60 + today.getMinutes()
-    : 24 * 60;
+  // Total horas reales hoy
+  const totalReal = real.reduce((a,s) => a + parseFloat(s.hours||0), 0);
 
-  const cards = [];
-  let doneCount = 0, missedCount = 0, pendCount = 0;
-  let planTotal = 0, realTotal = 0;
-
-  // Planned event cards
-  planned.forEach(ev => {
-    const color  = DOT_COLORS[ev.type] || '#888';
-    const label  = ev.desc || TYPE_LABELS[ev.type] || ev.type;
-    const evS    = timeToMins(ev.time);
-    const evE    = ev.endTime ? timeToMins(ev.endTime) : (evS !== null ? evS + Math.round((ev.hours||1)*60) : null);
-    const timeStr = ev.time
-      ? `${ev.time}${ev.endTime ? ' – ' + ev.endTime : ''}`
-      : '';
-    const match  = real.find(s => s.type === ev.type && !s._matched);
-    const planH  = ev.hours || 0;
-    planTotal += planH;
-
-    let status, realH = 0, diff = 0;
-    if (match) {
-      match._matched = true;
-      realH   = parseFloat(match.hours || 0);
-      diff    = realH - planH;
-      status  = 'done'; doneCount++;
-      realTotal += realH;
-    } else if (evE !== null && evE < nowMins) {
-      status = 'missed'; missedCount++;
-    } else {
-      status = 'pending'; pendCount++;
-    }
-
-    const barPct = status === 'done' && planH > 0
-      ? Math.min(100, (realH / planH) * 100) : 0;
-
-    const badgeHtml = {
-      done:    `<span class="act-badge badge-done">✓ Hecho</span>`,
-      missed:  `<span class="act-badge badge-missed">✗ No hecho</span>`,
-      pending: `<span class="act-badge badge-pending">Pendiente</span>`,
-    }[status];
-
-    const hoursHtml = status === 'done'
-      ? `<div class="act-hours-row">
-           <div class="act-hours-real">${realH.toFixed(1)}h</div>
-           <div class="act-hours-plan">/ ${planH.toFixed(1)}h plan</div>
-           ${Math.abs(diff) >= 0.25
-             ? `<div class="act-hours-diff ${diff>0?'diff-pos':'diff-neg'}">${diff>0?'+':''}${diff.toFixed(1)}h</div>`
-             : ''}
-         </div>
-         <div class="act-progress"><div class="act-progress-fill" style="width:${barPct}%;background:${color}"></div></div>`
-      : status === 'missed'
-        ? `<div class="act-hours-row"><div class="act-hours-real" style="color:var(--red)">0h</div><div class="act-hours-plan">/ ${planH.toFixed(1)}h plan</div></div>`
-        : `<div class="act-hours-row"><div class="act-hours-real" style="color:var(--hint)">${planH.toFixed(1)}h</div><div class="act-hours-plan">planificado</div></div>`;
-
-    cards.push(`
-      <div class="act-card ${status}">
-        <div class="act-card-bar" style="background:${color}"></div>
-        <div class="act-card-body">
-          <div class="act-card-top">
-            <div class="act-card-left">
-              <div class="act-name">${escapeHtml(label)}</div>
-              ${timeStr ? `<div class="act-time">${timeStr} · ${planH}h</div>` : ''}
-            </div>
-            ${badgeHtml}
-          </div>
-          ${hoursHtml}
-        </div>
-      </div>`);
+  // Agrupar sesiones reales por tipo
+  const byType = {};
+  real.forEach(s => {
+    if (!byType[s.type]) byType[s.type] = { hrs:0, sessions:[] };
+    byType[s.type].hrs += parseFloat(s.hours||0);
+    byType[s.type].sessions.push(s);
   });
 
-  // Extra (unplanned) session cards
-  real.filter(s => !s._matched).forEach(s => {
-    const color  = DOT_COLORS[s.type] || '#888';
-    const label  = s.topic || TYPE_LABELS[s.type] || s.type;
-    const realH  = parseFloat(s.hours || 0);
-    realTotal += realH;
-    cards.push(`
-      <div class="act-card extra">
-        <div class="act-card-bar" style="background:${color}"></div>
-        <div class="act-card-body">
-          <div class="act-card-top">
-            <div class="act-card-left">
-              <div class="act-name">${escapeHtml(label)}</div>
-              ${s.time ? `<div class="act-time">${s.time} · ${realH.toFixed(1)}h</div>` : ''}
-            </div>
-            <span class="act-badge badge-extra">+ Extra</span>
-          </div>
-          <div class="act-hours-row">
-            <div class="act-hours-real">${realH.toFixed(1)}h</div>
-            <div class="act-hours-plan">no planificado</div>
-          </div>
-        </div>
-      </div>`);
-  });
+  // Número grande de horas
+  const bigHours = `<div class="pvr-big-block">
+    <div class="pvr-big-num">${totalReal.toFixed(1)}<span class="pvr-big-unit">h</span></div>
+    <div class="pvr-big-sub">hoy${real.length > 1 ? ' · ' + real.length + ' sesiones' : ''}</div>
+  </div>`;
 
-  // Summary card at bottom
-  const pct   = planTotal > 0 ? Math.round(realTotal / planTotal * 100) : null;
-  const pctC  = pct === null ? 'var(--muted)' : pct >= 80 ? 'var(--green-l)' : pct >= 50 ? 'var(--gold)' : 'var(--red)';
-  const summary = `
-    <div class="pvr-summary-strip">
-      <div class="pvr-sum-chips">
-        ${doneCount  > 0 ? `<span class="pvr-sum-chip chip-done">✓ ${doneCount} hecho${doneCount!==1?'s':''}</span>` : ''}
-        ${missedCount> 0 ? `<span class="pvr-sum-chip chip-missed">✗ ${missedCount} perdido${missedCount!==1?'s':''}</span>` : ''}
-        ${pendCount  > 0 ? `<span class="pvr-sum-chip chip-pend">${pendCount} pendiente${pendCount!==1?'s':''}</span>` : ''}
-        ${real.filter(s=>!s._matched).length > 0 ? `<span class="pvr-sum-chip" style="color:#3B8BD4">+${real.filter(s=>!s._matched).length} extra</span>` : ''}
-      </div>
-      ${pct !== null ? `<div class="pvr-pct" style="color:${pctC}">${pct}%</div>` : ''}
+  // Tipos con horas
+  const typeChips = Object.entries(byType).map(([type, data]) => {
+    const color = DOT_COLORS[type] || '#888';
+    const label = TYPE_LABELS[type] || type;
+    return `<div class="pvr-chip" style="border-color:${color}20;background:${color}10">
+      <span class="pvr-chip-dot" style="background:${color}"></span>
+      <span class="pvr-chip-label">${label}</span>
+      <span class="pvr-chip-hrs" style="color:${color}">${data.hrs.toFixed(1)}h</span>
     </div>`;
+  }).join('');
 
-  el.innerHTML = cards.join('') + summary;
+  // Sesiones individuales ordenadas por hora
+  const sessList = [...real]
+    .sort((a,b) => (a.time||'').localeCompare(b.time||''))
+    .map(s => {
+      const color = DOT_COLORS[s.type]||'#888';
+      const label = s.topic || TYPE_LABELS[s.type] || s.type;
+      const stars = s.mental ? '★'.repeat(s.mental) : '';
+      const mentalColor = ['','#E24B4A','#e67e22','#c9a227','#22a362','#1a7a4a'][s.mental] || 'var(--hint)';
+      return `<div class="pvr-sess-row">
+        <div class="pvr-sess-dot" style="background:${color}"></div>
+        <div class="pvr-sess-info">
+          <span class="pvr-sess-name">${escapeHtml(label)}</span>
+          ${s.time ? `<span class="pvr-sess-time">${s.time}</span>` : ''}
+          ${stars ? `<span class="pvr-sess-stars" style="color:${mentalColor}">${stars}</span>` : ''}
+        </div>
+        <span class="pvr-sess-h">${parseFloat(s.hours).toFixed(1)}h</span>
+      </div>`;
+    }).join('');
+
+  // Lo que había planificado y no se hizo
+  const plannedTypes = planned.map(e => e.type);
+  const realTypes    = Object.keys(byType);
+  const notDone      = planned.filter(e => !realTypes.includes(e.type));
+  const nowMins      = viewDate === todayStr
+    ? today.getHours()*60+today.getMinutes() : 24*60;
+
+  const notDoneHtml = notDone.length ? `<div class="pvr-notdone">
+    ${notDone.map(e => {
+      const evE  = e.endTime ? e.endTime.split(':').map(Number).reduce((h,m)=>h*60+m,0) : null;
+      const past = evE !== null && evE < nowMins;
+      const color = DOT_COLORS[e.type]||'#888';
+      const label = e.desc || TYPE_LABELS[e.type] || e.type;
+      return `<div class="pvr-notdone-row${past?' past':''}">
+        <span class="pvr-notdone-dot" style="background:${color}"></span>
+        <span class="pvr-notdone-label">${escapeHtml(label)}</span>
+        <span class="pvr-notdone-hrs">${e.hours}h</span>
+      </div>`;
+    }).join('')}
+  </div>` : '';
+
+  el.innerHTML =
+    bigHours +
+    (typeChips ? `<div class="pvr-chips">${typeChips}</div>` : '') +
+    (sessList  ? `<div class="pvr-sess-list">${sessList}</div>` : '') +
+    notDoneHtml;
 }
 
 function renderDayView() {

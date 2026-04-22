@@ -259,3 +259,96 @@ html, body {
 .more-item:last-child { border-bottom: none; }
 .more-item:hover { background: var(--bg2); border-radius: var(--radius-sm); }
 .more-item span:first-child { font-size: 20px; }
+
+/* ============================================================
+   PLAN VS REALIDAD — limpio, horas grandes
+   ============================================================ */
+
+.pvr-wrap {
+  background: var(--bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+/* Big hours number */
+.pvr-big-block {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 1.25rem 1.25rem .75rem;
+}
+.pvr-big-num {
+  font-size: 48px; font-weight: 700; font-family: var(--fm);
+  color: var(--text); line-height: 1;
+}
+.pvr-big-unit {
+  font-size: 22px; font-weight: 500; color: var(--muted);
+}
+.pvr-big-sub {
+  font-size: 12px; color: var(--hint); font-family: var(--fm);
+  margin-bottom: 4px;
+}
+
+/* Type chips */
+.pvr-chips {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 0 1.25rem .875rem;
+}
+.pvr-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 20px;
+  border: 0.5px solid var(--border);
+}
+.pvr-chip-dot   { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.pvr-chip-label { font-size: 11px; font-weight: 500; color: var(--muted); }
+.pvr-chip-hrs   { font-size: 12px; font-weight: 700; font-family: var(--fm); }
+
+/* Individual sessions */
+.pvr-sess-list {
+  border-top: 0.5px solid var(--border);
+  padding: .5rem 0;
+}
+.pvr-sess-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 1.25rem;
+}
+.pvr-sess-row:not(:last-child) { border-bottom: 0.5px solid var(--border); }
+.pvr-sess-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pvr-sess-info { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+.pvr-sess-name { font-size: 13px; font-weight: 500; }
+.pvr-sess-time { font-size: 11px; color: var(--hint); font-family: var(--fm); }
+.pvr-sess-stars { font-size: 11px; }
+.pvr-sess-h    { font-size: 15px; font-weight: 700; font-family: var(--fm); color: var(--green-l); white-space: nowrap; }
+
+/* Not done (planned but not registered) */
+.pvr-notdone {
+  border-top: 0.5px solid var(--border);
+  padding: .5rem 0;
+  background: var(--bg2);
+}
+.pvr-notdone-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 1.25rem; opacity: .55;
+}
+.pvr-notdone-row.past { opacity: .35; }
+.pvr-notdone-dot   { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.pvr-notdone-label { font-size: 12px; flex: 1; color: var(--muted); }
+.pvr-notdone-hrs   { font-size: 12px; font-family: var(--fm); color: var(--hint); }
+
+/* Empty state */
+.pvr-empty-screen {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; padding: 1.75rem 1rem;
+  text-align: center;
+}
+.pvr-empty-icon  { font-size: 30px; }
+.pvr-empty-title { font-size: 14px; font-weight: 600; color: var(--muted); }
+.pvr-empty-btns  { display: flex; gap: 8px; margin-top: 4px; }
+.pvr-empty-btn {
+  font-size: 12px; font-weight: 600; color: var(--green-d);
+  text-decoration: none; padding: 6px 14px;
+  border: 0.5px solid var(--green-d); border-radius: 20px;
+  background: rgba(15,77,46,.06); transition: background .15s;
+}
+.pvr-empty-btn:hover { background: rgba(15,77,46,.12); }
+
+.empty-msg { color: var(--hint); font-size: 13px; text-align: center; padding: .5rem 0; }
