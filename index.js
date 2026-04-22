@@ -109,7 +109,7 @@ function renderDayLabel() {
   document.getElementById('today-pill').style.display = isToday ? 'none' : 'inline-flex';
 }
 
-// ---- Plan vs realidad ----
+// ---- Plan vs realidad — Timeline ----
 function renderPVR() {
   const planned = (state.calEvents||[]).filter(e => e.date === viewDate);
   const real    = (state.sessions||[]).filter(s => s.date === viewDate).map(s => ({...s}));
@@ -118,7 +118,7 @@ function renderPVR() {
   if (!planned.length && !real.length) {
     el.innerHTML = `<div class="pvr-empty">
       <div class="pvr-empty-icon">📋</div>
-      <div>Sin plan ni sesiones este día</div>
+      <div>Sin actividades este día</div>
       <div class="pvr-links">
         <a class="pvr-link" href="calendario.html">+ Planificar</a>
         <a class="pvr-link" href="registrar.html">+ Registrar</a>
@@ -131,55 +131,149 @@ function renderPVR() {
     ? new Date().getHours() * 60 + new Date().getMinutes()
     : 24 * 60;
 
-  const rows = [];
-  planned.forEach(ev => {
+  // Sort planned events by start time
+  const sortedPlanned = [...planned].sort((a,b) => {
+    const aM = timeToMins(a.time) ?? 9999;
+    const bM = timeToMins(b.time) ?? 9999;
+    return aM - bM;
+  });
+
+  // Build timeline items (planned + extras)
+  const items = [];
+
+  sortedPlanned.forEach(ev => {
     const color  = DOT_COLORS[ev.type] || '#888';
     const label  = ev.desc || TYPE_LABELS[ev.type] || ev.type;
     const evS    = timeToMins(ev.time);
     const evE    = ev.endTime ? timeToMins(ev.endTime) : (evS !== null ? evS + Math.round((ev.hours||1)*60) : null);
-    const tStr   = ev.time ? `${ev.time}${ev.endTime?' – '+ev.endTime:''} · ${ev.hours}h` : `${ev.hours}h`;
     const match  = real.find(s => s.type === ev.type && !s._matched);
-    let badge, hStr;
+
+    let status, realH, planH = ev.hours || 0, diff = 0;
     if (match) {
       match._matched = true;
-      const rH = parseFloat(match.hours||0), pH = ev.hours||0, diff = rH - pH;
-      badge = `<span class="pvr-badge done">✓ Hecho</span>`;
-      hStr  = `${rH.toFixed(1)}h / ${pH.toFixed(1)}h`;
-      if (Math.abs(diff) >= 0.25) hStr += diff > 0
-        ? ` <span style="color:var(--green-l)">+${diff.toFixed(1)}h</span>`
-        : ` <span style="color:var(--red)">${diff.toFixed(1)}h</span>`;
+      realH  = parseFloat(match.hours||0);
+      diff   = realH - planH;
+      status = 'done';
     } else if (evE !== null && evE < nowMins) {
-      badge = `<span class="pvr-badge missed">✗ No hecho</span>`; hStr = `0 / ${ev.hours}h`;
+      status = 'missed'; realH = 0;
     } else {
-      badge = `<span class="pvr-badge pending">⏳ Pendiente</span>`; hStr = `${ev.hours}h`;
+      status = 'pending'; realH = null;
     }
-    rows.push(`<div class="pvr-row">
-      <div class="pvr-dot" style="background:${color}"></div>
-      <div class="pvr-info"><div class="pvr-title">${escapeHtml(label)}</div><div class="pvr-time">${tStr}</div></div>
-      <div class="pvr-status">${badge}<span class="pvr-hours">${hStr}</span></div>
-    </div>`);
+
+    items.push({ ev, label, color, status, planH, realH, diff, evS, evE });
   });
 
+  // Extra (unplanned) sessions
   real.filter(s => !s._matched).forEach(s => {
-    const color = DOT_COLORS[s.type]||'#888', label = s.topic||TYPE_LABELS[s.type]||s.type;
-    rows.push(`<div class="pvr-row">
-      <div class="pvr-dot" style="background:${color}"></div>
-      <div class="pvr-info"><div class="pvr-title">${escapeHtml(label)}</div><div class="pvr-time">${s.time?s.time+' · ':''}${s.hours}h · no planificado</div></div>
-      <div class="pvr-status"><span class="pvr-badge extra">+ Extra</span><span class="pvr-hours">${parseFloat(s.hours).toFixed(1)}h</span></div>
-    </div>`);
+    items.push({
+      extra: true,
+      label: s.topic || TYPE_LABELS[s.type] || s.type,
+      color: DOT_COLORS[s.type] || '#888',
+      type:  s.type,
+      hours: parseFloat(s.hours||0),
+      time:  s.time,
+      evS:   timeToMins(s.time),
+    });
   });
 
-  const planH = planned.reduce((a,e) => a+(e.hours||0), 0);
-  const realH = real.reduce((a,s) => a+parseFloat(s.hours||0), 0);
-  const pct   = planH > 0 ? Math.round(realH/planH*100) : null;
-  const pctC  = pct === null ? '' : pct >= 80 ? 'var(--green-l)' : pct >= 50 ? 'var(--gold)' : 'var(--red)';
-  const summary = planH > 0 ? `<div class="pvr-summary">
-    <span class="pvr-sum-item"><span class="pvr-sum-dot" style="background:var(--hint)"></span>Plan: <strong>${planH.toFixed(1)}h</strong></span>
-    <span class="pvr-sum-item"><span class="pvr-sum-dot" style="background:var(--green-l)"></span>Real: <strong>${realH.toFixed(1)}h</strong></span>
-    ${pct!==null?`<span style="margin-left:auto;color:${pctC};font-weight:700;font-size:13px;font-family:var(--fm)">${pct}%</span>`:''}
-  </div>` : '';
+  // Sort all by start time
+  items.sort((a,b) => (a.evS??9999) - (b.evS??9999));
 
-  el.innerHTML = rows.join('') + summary;
+  // Render timeline
+  const tlItems = items.map((it, idx) => {
+    const isLast = idx === items.length - 1;
+
+    if (it.extra) {
+      const timeStr = it.time || '';
+      return `
+        <div class="tl-item tl-extra">
+          <div class="tl-left">
+            <div class="tl-time">${timeStr}</div>
+            <div class="tl-line-wrap">
+              <div class="tl-node" style="background:${it.color};border-color:${it.color}"></div>
+              ${!isLast ? '<div class="tl-line"></div>' : ''}
+            </div>
+          </div>
+          <div class="tl-card tl-card-extra">
+            <div class="tl-card-top">
+              <span class="tl-label">${escapeHtml(it.label)}</span>
+              <span class="tl-badge tl-badge-extra">+ Extra</span>
+            </div>
+            <div class="tl-meta" style="color:${it.color}">${it.hours.toFixed(1)}h · no planificado</div>
+          </div>
+        </div>`;
+    }
+
+    const { ev, label, color, status, planH, realH, diff, evS, evE } = it;
+    const startStr  = ev.time || '';
+    const endStr    = ev.endTime || '';
+    const timeRange = startStr ? `${startStr}${endStr?' – '+endStr:''}` : '';
+
+    // Progress bar width for done/partial
+    const barW = status === 'done' && planH > 0
+      ? Math.min(100, (realH/planH)*100)
+      : status === 'missed' ? 0 : null;
+
+    const badgeMap = {
+      done:    `<span class="tl-badge tl-badge-done">✓ Hecho</span>`,
+      missed:  `<span class="tl-badge tl-badge-missed">✗ No hecho</span>`,
+      pending: `<span class="tl-badge tl-badge-pending">· · ·</span>`,
+    };
+
+    const hoursLine = status === 'done'
+      ? `${realH.toFixed(1)}h <span class="tl-plan-ref">/ ${planH.toFixed(1)}h plan</span>${Math.abs(diff)>=0.25 ? ` <span style="color:${diff>0?'var(--green-l)':'var(--red)'}">${diff>0?'+':''}${diff.toFixed(1)}h</span>` : ''}`
+      : status === 'missed'
+        ? `<span style="color:var(--red)">0h / ${planH.toFixed(1)}h plan</span>`
+        : `${planH.toFixed(1)}h planificado`;
+
+    const progressBar = barW !== null ? `
+      <div class="tl-progress">
+        <div class="tl-progress-fill" style="width:${barW}%;background:${color}"></div>
+      </div>` : '';
+
+    return `
+      <div class="tl-item tl-${status}">
+        <div class="tl-left">
+          <div class="tl-time">${timeRange}</div>
+          <div class="tl-line-wrap">
+            <div class="tl-node tl-node-${status}" style="${status==='done'?'background:'+color+';border-color:'+color:status==='missed'?'border-color:var(--red)':'border-color:'+color}"></div>
+            ${!isLast ? '<div class="tl-line"></div>' : ''}
+          </div>
+        </div>
+        <div class="tl-card tl-card-${status}">
+          <div class="tl-card-top">
+            <div class="tl-label-wrap">
+              <span class="tl-type-dot" style="background:${color}"></span>
+              <span class="tl-label">${escapeHtml(label)}</span>
+            </div>
+            ${badgeMap[status]}
+          </div>
+          <div class="tl-meta">${hoursLine}</div>
+          ${progressBar}
+        </div>
+      </div>`;
+  }).join('');
+
+  // Summary footer
+  const planH  = planned.reduce((a,e) => a+(e.hours||0), 0);
+  const realH  = real.reduce((a,s) => a+parseFloat(s.hours||0), 0);
+  const pct    = planH > 0 ? Math.round(realH/planH*100) : null;
+  const pctC   = pct===null?'':pct>=80?'var(--green-l)':pct>=50?'var(--gold)':'var(--red)';
+  const doneCount   = items.filter(it => it.status==='done').length;
+  const missedCount = items.filter(it => it.status==='missed').length;
+  const pendCount   = items.filter(it => it.status==='pending').length;
+
+  const footer = `
+    <div class="tl-footer">
+      <div class="tl-footer-stats">
+        <span class="tl-fstat done-c">✓ ${doneCount} hecho${doneCount!==1?'s':''}</span>
+        ${missedCount>0?`<span class="tl-fstat missed-c">✗ ${missedCount} perdido${missedCount!==1?'s':''}</span>`:''}
+        ${pendCount>0?`<span class="tl-fstat pend-c">· ${pendCount} pendiente${pendCount!==1?'s':''}</span>`:''}
+      </div>
+      ${pct!==null?`<div class="tl-footer-pct" style="color:${pctC}">${realH.toFixed(1)}h / ${planH.toFixed(1)}h · <strong>${pct}%</strong></div>`:''}
+    </div>`;
+
+  el.innerHTML = `<div class="tl-wrap">${tlItems}</div>${footer}`;
 }
 
 function renderDayView() { renderDayLabel(); renderDayStrip(); renderPVR(); }
