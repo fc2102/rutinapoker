@@ -208,7 +208,74 @@ function renderAll() {
   renderNavBadges();
   renderKPIs();
   renderDayView();
+  renderWeekChart();
+  renderGoals();
+  renderRecent();
 }
 
 renderAll();
 initState(fresh => { state = fresh; renderAll(); });
+
+// ---- Week chart ----
+function renderWeekChart() {
+  const DNAMES = ['L','M','X','J','V','S','D'];
+  const dow = today.getDay(), mo = dow===0?6:dow-1;
+  let maxH = 0; const bars = [];
+  for (let i = 0; i < 7; i++) {
+    const d  = new Date(today); d.setDate(today.getDate()-mo+i);
+    const ds = dateISO(d);
+    const hrs = (state.sessions||[]).filter(s=>s.date===ds).reduce((a,s)=>a+parseFloat(s.hours||0),0);
+    if (hrs > maxH) maxH = hrs;
+    bars.push({ label:DNAMES[i], hrs, isToday:ds===todayStr, ds });
+  }
+  if (maxH < 1) maxH = 1;
+  const el = document.getElementById('week-chart');
+  if (!el) return;
+  el.innerHTML = bars.map(b => `
+    <div class="wday" onclick="selectDay('${b.ds}')">
+      <div class="wbar-wrap">
+        <div class="wbar" style="height:${Math.max(2,(b.hrs/maxH)*64)}px;background:${b.isToday?'#3B8BD4':'var(--green-d)'}"></div>
+      </div>
+      <div class="wlbl" style="font-weight:${b.isToday?700:400};color:${b.isToday?'var(--text)':'var(--hint)'}">${b.label}</div>
+    </div>`).join('');
+}
+
+// ---- Goals ----
+function renderGoals() {
+  const totals = window._weekTotals || { estudio:0, coaching:0, juego:0 };
+  const GC = { estudio:'#3B8BD4', coaching:'var(--gold)', juego:'var(--green-l)' };
+  const GL = { estudio:'Estudio', coaching:'Coaching', juego:'Juego' };
+  const goals = state.goals || { estudio:10, coaching:3, juego:15 };
+  const el = document.getElementById('goals-section');
+  if (!el) return;
+  el.innerHTML = Object.keys(goals).map(k => {
+    const pct = Math.min(100, (totals[k]||0)/(goals[k]||1)*100);
+    return `<div class="goal-row">
+      <span class="gl">${GL[k]}</span>
+      <div class="gb"><div class="gf" style="width:${pct}%;background:${GC[k]}"></div></div>
+      <span class="gp">${Math.round(pct)}%</span>
+    </div>
+    <div class="goal-sub">${(totals[k]||0).toFixed(1)}h / ${goals[k]}h</div>`;
+  }).join('');
+}
+
+// ---- Recent sessions ----
+function renderRecent() {
+  const sorted = [...(state.sessions||[])].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  const el = document.getElementById('recent-sessions');
+  if (!el) return;
+  if (!sorted.length) { el.innerHTML='<p class="empty-msg">Sin sesiones aún</p>'; return; }
+  el.innerHTML = sorted.map(x => {
+    const color = DOT_COLORS[x.type]||'#888';
+    const label = TYPE_LABELS[x.type]||x.type;
+    const stars = x.mental?'★'.repeat(x.mental):'';
+    return `<div class="si">
+      <div class="dot" style="background:${color}"></div>
+      <div class="si-info">
+        <div class="si-title">${escapeHtml(x.topic||label)}</div>
+        <div class="si-meta">${x.date}${x.time?' · '+x.time:''}${stars?' · '+stars:''}</div>
+      </div>
+      <span class="si-hrs">${parseFloat(x.hours||0).toFixed(1)}h</span>
+    </div>`;
+  }).join('');
+}

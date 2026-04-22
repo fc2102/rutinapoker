@@ -352,3 +352,171 @@ html, body {
 .pvr-empty-btn:hover { background: rgba(15,77,46,.12); }
 
 .empty-msg { color: var(--hint); font-size: 13px; text-align: center; padding: .5rem 0; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  background: var(--green-d);
+  padding: 1rem 1.25rem .75rem;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; right: -50px; top: -50px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: rgba(201,162,39,.10); pointer-events: none;
+}
+.hero-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: .875rem;
+}
+.hero-left   { display: flex; align-items: center; gap: 10px; }
+.hero-suit   { font-size: 28px; line-height: 1; opacity: .9; }
+.hero-title  { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -.2px; }
+.hero-date   { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; font-family: var(--fm); text-transform: capitalize; }
+.hero-stats-btn {
+  font-size: 12px; font-weight: 700; color: rgba(255,255,255,.8);
+  text-decoration: none; padding: 6px 12px;
+  background: rgba(255,255,255,.12); border-radius: 20px;
+  transition: background .15s; white-space: nowrap;
+}
+.hero-stats-btn:hover { background: rgba(255,255,255,.22); }
+
+.hero-kpis {
+  display: flex; align-items: center;
+  background: rgba(0,0,0,.15); border-radius: var(--radius-sm);
+  padding: .5rem 0;
+}
+.kpi       { flex: 1; text-align: center; position: relative; }
+.kpi-val   { font-size: 17px; font-weight: 700; font-family: var(--fm); color: #fff; line-height: 1; }
+.kpi-lbl   { font-size: 9px; color: rgba(255,255,255,.45); margin-top: 3px; text-transform: uppercase; letter-spacing: .4px; }
+.kpi-sep   { width: 0.5px; height: 28px; background: rgba(255,255,255,.15); flex-shrink: 0; }
+
+/* ============================================================
+   QUICK NAV
+   ============================================================ */
+.qnav-bar {
+  display: flex; background: var(--bg);
+  border-bottom: 0.5px solid var(--border);
+  overflow-x: auto; scrollbar-width: none;
+}
+.qnav-bar::-webkit-scrollbar { display: none; }
+.qnav-item {
+  flex: 1; min-width: 56px;
+  display: flex; flex-direction: column; align-items: center;
+  padding: .625rem .25rem; text-decoration: none; color: var(--muted);
+  border-right: 0.5px solid var(--border);
+  transition: background .15s, color .15s; gap: 3px;
+}
+.qnav-item:last-child { border-right: none; }
+.qnav-item:hover { background: var(--bg2); color: var(--green-d); }
+.qnav-bubble { font-size: 18px; line-height: 1; }
+.qnav-lbl    { font-size: 9px; font-weight: 700; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 54px; }
+
+/* ============================================================
+   TODAY SECTION — day nav + week strip
+   ============================================================ */
+.today-header {
+  background: var(--bg); border-bottom: 0.5px solid var(--border);
+  padding: .625rem .75rem .5rem; margin-bottom: .75rem;
+}
+.today-nav {
+  display: flex; align-items: center; gap: 8px; margin-bottom: .5rem;
+}
+.tnav-btn {
+  background: none; border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; flex-shrink: 0;
+  transition: background .12s; line-height: 1;
+}
+.tnav-btn:hover { background: var(--bg2); }
+.tnav-center {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.tnav-label {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  text-transform: capitalize; text-align: center;
+}
+.tnav-today {
+  font-size: 10px; font-weight: 700; padding: 3px 9px;
+  border-radius: 12px; border: 0.5px solid var(--green-d);
+  background: rgba(15,77,46,.08); color: var(--green-d);
+  cursor: pointer; white-space: nowrap;
+}
+
+.day-strip { display: flex; gap: 3px; }
+
+/* ============================================================
+   PLAN VS REALIDAD CARD
+   ============================================================ */
+.pvr-card {
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 0 0 .75rem;
+}
+
+/* ============================================================
+   SECTION HEADERS
+   ============================================================ */
+.section-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 1rem 0 .5rem;
+}
+.sec-title {
+  font-size: 10px; font-weight: 700; color: var(--hint);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.see-all {
+  font-size: 11px; font-weight: 700; color: var(--green-d);
+  text-decoration: none;
+}
+.see-all:hover { text-decoration: underline; }
+
+/* ============================================================
+   WEEK CHART
+   ============================================================ */
+.chart-card {
+  background: var(--bg); border: 0.5px solid var(--border);
+  border-radius: var(--radius); padding: 1rem; margin-bottom: .75rem;
+}
+.week-bar {
+  display: flex; align-items: flex-end; gap: 4px; height: 72px; margin-bottom: .5rem;
+}
+.wday      { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+.wbar-wrap { flex: 1; display: flex; align-items: flex-end; width: 100%; }
+.wbar      { width: 100%; border-radius: 3px 3px 0 0; min-height: 2px; transition: height .35s; }
+.wlbl      { font-size: 9px; color: var(--hint); font-family: var(--fm); }
+.chart-leg { display: flex; gap: 12px; flex-wrap: wrap; }
+.cleg      { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--hint); }
+.cleg-dot  { display: inline-block; width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* ============================================================
+   GOALS + RECENT
+   ============================================================ */
+.goals-card {
+  background: var(--bg); border: 0.5px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: .75rem;
+}
+.goal-row  { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.gl        { font-size: 12px; font-weight: 500; flex: 1; }
+.gb        { flex: 2; height: 7px; background: var(--bg2); border-radius: 4px; overflow: hidden; }
+.gf        { height: 100%; border-radius: 4px; transition: width .4s; }
+.gp        { font-size: 11px; font-family: var(--fm); color: var(--muted); min-width: 36px; text-align: right; }
+.goal-sub  { font-size: 10px; color: var(--hint); margin-bottom: 10px; font-family: var(--fm); }
+
+.recent-card {
+  background: var(--bg); border: 0.5px solid var(--border);
+  border-radius: var(--radius); padding: .5rem 1.25rem; margin-bottom: .75rem;
+}
+.si        { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); }
+.si:last-child { border-bottom: none; }
+.dot       { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.si-info   { flex: 1; min-width: 0; }
+.si-title  { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.si-meta   { font-size: 11px; color: var(--hint); font-family: var(--fm); margin-top: 1px; }
+.si-hrs    { font-size: 14px; font-weight: 700; font-family: var(--fm); color: var(--green-l); white-space: nowrap; }
+.empty-msg { color: var(--hint); font-size: 13px; text-align: center; padding: .75rem 0; }
