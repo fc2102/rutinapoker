@@ -6,7 +6,7 @@ const todayStr = todayISO();
 let viewDate = todayStr;
 
 // ---- Header date ----
-document.getElementById('today-label').textContent =
+(document.getElementById('today-label')||{}).textContent =
   `${DAYS_ES[today.getDay()]} · ${today.toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' })}`;
 
 // ---- Helpers ----
@@ -36,13 +36,13 @@ function getWeekSessions() {
 // ---- Nav badges ----
 function renderNavBadges() {
   const pending = (state.lessons||[]).filter(l => !l.done).length;
-  document.getElementById('nav-clases').textContent  = pending ? pending + ' pend.' : 'Clases';
+  (document.getElementById('nav-clases')||{}).textContent  = pending ? pending + ' pend.' : 'Clases';
   const allH    = Object.values(state.habits||{}).flat();
   const habDone = allH.filter(h => h.done).length;
-  document.getElementById('nav-habitos').textContent = allH.length ? `${habDone}/${allH.length}` : 'Hábitos';
+  (document.getElementById('nav-habitos')||{}).textContent = allH.length ? `${habDone}/${allH.length}` : 'Hábitos';
   const brTotal = (state.bankroll?.initial||0) + (state.bankroll?.weeks||[]).reduce((a,w)=>a+parseFloat(w.result||0),0);
   // nav-bankroll not in this HTML version
-  document.getElementById('nav-notas').textContent    = (state.notes||[]).length + ' Notas';
+  (document.getElementById('nav-notas')||{}).textContent    = (state.notes||[]).length + ' Notas';
 }
 
 // ---- KPIs (week totals in hero) ----
@@ -83,14 +83,14 @@ function renderDayLabel() {
   else if (isTomorrow) label = 'Mañana · ' + d.toLocaleDateString('es-ES', { day:'numeric', month:'long' });
   else if (isYesterday) label = 'Ayer · ' + d.toLocaleDateString('es-ES', { day:'numeric', month:'long' });
   else label = d.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
-  document.getElementById('day-nav-label').textContent = label;
+  (document.getElementById('day-nav-label')||{}).textContent = label;
 }
 
 // ---- Week strip ----
 function renderWeekStrip() {
   const SHORT = ['L','M','X','J','V','S','D'];
   const mon   = getMondayOf(new Date(viewDate + 'T12:00:00'));
-  document.getElementById('day-strip').innerHTML = Array.from({ length: 7 }, (_, i) => {
+  (document.getElementById('day-strip')||{}).innerHTML = Array.from({ length: 7 }, (_, i) => {
     const d   = addDays(mon, i);
     const ds  = dateISO(d);
     const evs = [...(state.calEvents||[]).filter(e=>e.date===ds), ...(state.sessions||[]).filter(s=>s.date===ds)];
