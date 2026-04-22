@@ -33,12 +33,6 @@ function getWeekSessions() {
   });
 }
 
-// ---- More menu ----
-function toggleMore() {
-  document.getElementById('more-menu').classList.toggle('open');
-  document.getElementById('more-overlay').classList.toggle('open');
-}
-
 // ---- Nav badges ----
 function renderNavBadges() {
   const pending = (state.lessons||[]).filter(l => !l.done).length;
@@ -47,7 +41,7 @@ function renderNavBadges() {
   const habDone = allH.filter(h => h.done).length;
   document.getElementById('nav-habitos').textContent = allH.length ? `${habDone}/${allH.length}` : 'Hábitos';
   const brTotal = (state.bankroll?.initial||0) + (state.bankroll?.weeks||[]).reduce((a,w)=>a+parseFloat(w.result||0),0);
-  document.getElementById('nav-bankroll').textContent = '€' + brTotal.toFixed(0) + ' Bankroll';
+  // nav-bankroll not in this HTML version
   document.getElementById('nav-notas').textContent    = (state.notes||[]).length + ' Notas';
 }
 
@@ -57,11 +51,16 @@ function renderKPIs() {
   const totals = { estudio:0, coaching:0, juego:0 };
   week.forEach(s => { if (totals[s.type]!==undefined) totals[s.type]+=parseFloat(s.hours||0); });
   const total = Object.values(totals).reduce((a,b)=>a+b,0);
-  document.getElementById('hero-kpis').innerHTML = `
-    <div class="kpi"><div class="kpi-val">${total.toFixed(1)}h</div><div class="kpi-lbl">Semana</div></div>
-    <div class="kpi"><div class="kpi-val">${totals.estudio.toFixed(1)}h</div><div class="kpi-lbl">Estudio</div></div>
-    <div class="kpi"><div class="kpi-val">${totals.coaching.toFixed(1)}h</div><div class="kpi-lbl">Coaching</div></div>
-    <div class="kpi"><div class="kpi-val">${totals.juego.toFixed(1)}h</div><div class="kpi-lbl">Grind</div></div>`;
+  const brTotal = (state.bankroll?.initial||0) + (state.bankroll?.weeks||[]).reduce((a,w)=>a+parseFloat(w.result||0),0);
+
+  const elTotal = document.getElementById('stat-total');
+  const elStudy = document.getElementById('stat-study');
+  const elGame  = document.getElementById('stat-game');
+  const elBr    = document.getElementById('br-display');
+  if (elTotal) elTotal.textContent = total.toFixed(1) + 'h';
+  if (elStudy) elStudy.textContent = totals.estudio.toFixed(1) + 'h';
+  if (elGame)  elGame.textContent  = totals.juego.toFixed(1)   + 'h';
+  if (elBr)    elBr.textContent    = '€' + brTotal.toFixed(0);
   window._weekTotals = totals;
 }
 
